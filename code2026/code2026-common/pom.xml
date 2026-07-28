@@ -71,6 +71,17 @@ Maven POM文件 —— code2026-common 公共模块
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+        <!-- LangChain4j: Java版LangChain，OpenAI兼容客户端对接DeepSeek -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>1.0.0-beta1</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+            <version>1.0.0-beta1</version>
+        </dependency>
     </dependencies>
 
     <!-- ===== 构建配置 ===== -->
