@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Maven项目对象模型（POM - Project Object Model）文件 —— 父项目
+这是Maven多模块项目的父POM，定义了所有子模块共享的配置
+包括：Spring Boot版本、第三方库版本管理、构建插件
+
+Maven是什么？
+一个Java项目的构建和依赖管理工具。你只需声明需要哪些第三方库，
+Maven会自动从中央仓库下载对应的jar包及其所有依赖的jar包。
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion> <!-- POM模型版本，固定4.0.0 -->
+
+    <!-- ===== 继承Spring Boot父POM ===== -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>    <!-- Spring Boot的组织标识 -->
+        <artifactId>spring-boot-starter-parent</artifactId> <!-- Spring Boot父项目 -->
+        <version>3.3.1</version>  <!-- Spring Boot版本号 -->
+        <relativePath/>           <!-- 空表示从Maven仓库查找父POM，不从本地路径查找 -->
+    </parent>
+
+    <!-- ===== 当前项目的坐标（GAV = GroupId + ArtifactId + Version） ===== -->
+    <groupId>com.wll</groupId>           <!-- 组织/团队的唯一标识 -->
+    <artifactId>code2026</artifactId>    <!-- 项目名称 -->
+    <version>0.0.1-SNAPSHOT</version>   <!-- 版本号，SNAPSHOT表示开发中的快照版本 -->
+    <packaging>pom</packaging>          <!-- 打包类型：pom表示这是一个父项目（不生成jar/war） -->
+    <name>code2026</name>               <!-- 项目显示名称 -->
+    <description>校园外卖 - 父项目</description> <!-- 项目描述 -->
+
+    <!-- ===== 子模块列表 ===== -->
+    <modules>
+        <module>code2026-common</module>     <!-- 公共模块：实体、Mapper、通用服务、配置 -->
+        <module>springboot-backend</module>  <!-- Web后台模块：管理端+用户端API（端口9090） -->
+        <module>miniapp-backend</module>     <!-- 小程序后端模块：微信小程序API（端口9091） -->
+    </modules>
+
+    <!-- ===== 统一版本号管理 ===== -->
+    <properties>
+        <java.version>17</java.version>  <!-- Java编译版本 -->
+        <!-- 第三方库版本号集中管理，子模块引用时不需要写版本号 -->
+        <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version> <!-- MyBatis + Spring Boot集成 -->
+        <hutool.version>5.8.25</hutool.version>   <!-- Hutool：Java工具类库（日期、HTTP、JSON等） -->
+        <pagehelper.version>1.4.6</pagehelper.version> <!-- PageHelper：MyBatis分页插件 -->
+        <minio.version>8.5.7</minio.version>       <!-- MinIO：对象存储客户端SDK -->
+        <jjwt.version>0.12.5</jjwt.version>        <!-- JJWT：JWT（JSON Web Token）生成和验证库 -->
+    </properties>
+
+    <!-- ===== 依赖版本管理（只声明版本号，不实际引入） ===== -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- MyBatis + Spring Boot启动器：自动配置MyBatis、数据源、事务管理 -->
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot.version}</version> <!-- 引用上面properties定义的版本 -->
+            </dependency>
+            <!-- Hutool全能工具库：提供日期处理、HTTP请求、JSON解析、文件操作等常用工具 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <!-- PageHelper分页插件：一行代码实现MyBatis物理分页 -->
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper.version}</version>
+                <exclusions>
+                    <!-- 排除PageHelper自带的MyBatis依赖，避免与mybatis-spring-boot-starter的版本冲突 -->
+                    <exclusion>
+                        <groupId>org.mybatis</groupId>
+                        <artifactId>mybatis</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- MinIO对象存储Java客户端：用于文件上传下载、桶管理 -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
+            </dependency>
+            <!-- JJWT的三个子模块（需一起引入）： -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>         <!-- JWT API接口定义 -->
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>        <!-- JWT实现逻辑 -->
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>     <!-- 使用Jackson进行JWT的JSON序列化 -->
+                <version>${jjwt.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ===== 构建配置 ===== -->
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven插件：支持打包为可执行jar（java -jar 直接运行） -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- 打包时排除Lombok（Lombok是编译期注解处理器，运行时不需要） -->
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

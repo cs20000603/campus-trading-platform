@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.GoodsMapper接口
+    商品(Goods)数据访问层，负责商城商品的增删改查操作，是最核心的数据表之一
+-->
+<mapper namespace="com.wll.common.mapper.GoodsMapper">
+
+    <!--
+        查询所有商品（带分页和多个条件筛选）
+        LEFT JOIN category分类表，获取商品所属分类的名称
+        查询列说明：
+          goods.*              - 商品表的所有列
+          category.name        - 分类名称（取别名categoryName）
+        筛选条件支持：商品名称/描述模糊搜索、按分类筛选、按状态筛选、按店铺筛选
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Goods">
+        select `goods`.*, category.name as categoryName from `goods`
+        <!--
+            LEFT JOIN category ON goods.category_id = category.id
+            左连接分类表：获取每个商品所属分类的名称
+        -->
+        left join category on `goods`.category_id = category.id
+        <where>
+            <!--
+                按商品名称或描述模糊搜索
+                test中 '!='' 表示也不为空字符串
+                同时对goods.name（商品名称）和goods.description（商品描述）进行模糊匹配
+                满足任一条件即可（OR连接），让用户搜名称或描述都能找到
+            -->
+            <if test="name != null and name != ''"> and (`goods`.name like concat('%', #{name}, '%') or `goods`.description like concat('%', #{name}, '%'))</if>
+            <!-- 按分类ID精确筛选：查看某个分类下的所有商品 -->
+            <if test="categoryId != null"> and `goods`.category_id = #{categoryId}</if>
+            <!--
+                按商品状态筛选：
+                常见状态值如："上架"（正常销售）、"下架"（暂停销售）、"待审核"等
+            -->
+            <if test="status != null"> and `goods`.status = #{status}</if>
+            <!-- 按店铺ID筛选：查看某个店铺下的所有商品 -->
+            <if test="shopId != null"> and `goods`.shop_id = #{shopId}</if>
+        </where>
+        <!-- 按商品id降序排列 -->
+        order by `goods`.id desc
+    </select>
+
+    <!-- 按主键id查询单个商品 -->
+    <select id="selectById" resultType="com.wll.common.entity.Goods">
+        select * from `goods` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除商品 -->
+    <delete id="deleteById">
+        delete from `goods` where id = #{id}
+    </delete>
+
+    <!--
+        插入一件新商品
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明（共15个字段）：
+          id            - 商品唯一编号（主键，自动生成）
+          name          - 商品名称
+          img           - 商品主图片URL地址
+          price         - 商品原价
+          description   - 商品简要描述/简介
+          content       - 商品详细内容（富文本HTML内容，详细介绍）
+          store         - 库存数量
+          category_id   - 所属分类ID（外键，关联category表）
+          status        - 商品状态（如上架、下架、待审核等）
+          views         - 浏览次数（浏览量统计）
+          sale_count    - 销售数量（已卖出多少件）
+          time          - 上架时间
+          recommend     - 是否推荐（标记为推荐商品，展示在首页等位置）
+          shop_id       - 所属店铺ID（外键，关联shop表）
+          discount_price - 折扣价格（促销价格，null表示无折扣）
+          discount_end  - 折扣结束时间
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Goods" useGeneratedKeys="true">
+        insert into `goods`
+        <!-- 动态拼接列名列表 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null">name,</if>
+            <if test="img != null">img,</if>
+            <if test="price != null">price,</if>
+            <if test="description != null">description,</if>
+            <if test="content != null">content,</if>
+            <if test="store != null">store,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="status != null">status,</if>
+            <if test="views != null">views,</if>
+            <if test="saleCount != null">sale_count,</if>
+            <if test="time != null">time,</if>
+            <if test="recommend != null">recommend,</if>
+            <if test="shopId != null">shop_id,</if>
+            <if test="discountPrice != null">discount_price,</if>
+            <if test="discountEnd != null">discount_end,</if>
+        </trim>
+        values
+        <!-- 动态拼接值列表，与列名顺序一一对应 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null">#{name},</if>
+            <if test="img != null">#{img},</if>
+            <if test="price != null">#{price},</if>
+            <if test="description != null">#{description},</if>
+            <if test="content != null">#{content},</if>
+            <if test="store != null">#{store},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="views != null">#{views},</if>
+            <if test="saleCount != null">#{saleCount},</if>
+            <if test="time != null">#{time},</if>
+            <if test="recommend != null">#{recommend},</if>
+            <if test="shopId != null">#{shopId},</if>
+            <if test="discountPrice != null">#{discountPrice},</if>
+            <if test="discountEnd != null">#{discountEnd},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新商品信息
+        使用set标签实现动态更新：只更新传入的非null字段，其余字段保持不变
+        可更新所有16个字段，支持部分更新（如只修改价格、只修改库存等）
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Goods">
+        update `goods`
+        <set>
+            <if test="id != null">id = #{id},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="img != null">img = #{img},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="store != null">store = #{store},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="views != null">views = #{views},</if>
+            <if test="saleCount != null">sale_count = #{saleCount},</if>
+            <if test="time != null">time = #{time},</if>
+            <if test="recommend != null">recommend = #{recommend},</if>
+            <if test="shopId != null">shop_id = #{shopId},</if>
+            <if test="discountPrice != null">discount_price = #{discountPrice},</if>
+            <if test="discountEnd != null">discount_end = #{discountEnd},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--
+        搜索建议查询：根据关键词返回商品名称建议列表
+        这是用于前端搜索框的自动补全/建议功能
+        resultType="string"：返回的是字符串列表（只有商品名称，不是实体对象）
+        SELECT DISTINCT name：去重查询，相同的商品名称只返回一次
+        LIMIT 10：最多返回10条建议，避免数据过多影响性能
+    -->
+    <select id="selectSuggestions" resultType="string">
+        select distinct name from `goods` where name like concat('%', #{keyword}, '%') limit 10
+    </select>
+
+</mapper>

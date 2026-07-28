@@ -1,0 +1,62 @@
+<view class="container" wx:if="{{goods}}">
+  <!-- Image Swiper -->
+  <view class="image-section">
+    <swiper class="image-swiper" indicator-dots="{{images.length > 1}}" indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#ee0a24" bindchange="onSwiperChange">
+      <swiper-item wx:for="{{images}}" wx:key="*this">
+        <image class="detail-image" src="{{item}}" mode="aspectFill" data-index="{{index}}" bindtap="onPreviewImage" />
+      </swiper-item>
+    </swiper>
+    <view class="image-counter" wx:if="{{images.length > 1}}">{{currentImage + 1}}/{{images.length}}</view>
+  </view>
+
+  <!-- Price & Title -->
+  <view class="detail-header">
+    <view class="detail-price">￥{{goods.price}}
+      <text wx:if="{{goods.originalPrice}}" class="detail-original">￥{{goods.originalPrice}}</text>
+    </view>
+    <view class="detail-title">{{goods.title}}</view>
+    <view class="detail-meta">
+      <van-tag type="warning" size="medium">{{goods.condition}}</van-tag>
+      <van-tag size="medium" style="margin-left: 6px">{{goods.deliveryType}}</van-tag>
+      <van-tag type="primary" size="medium" style="margin-left: 6px" wx:if="{{goods.category}}">{{goods.category}}</van-tag>
+      <text class="detail-views">浏览 {{goods.views || 0}}</text>
+    </view>
+  </view>
+
+  <!-- Seller Card -->
+  <view class="seller-card">
+    <image class="seller-avatar" src="{{goods.sellerAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+    <view class="seller-info">
+      <view class="seller-name">{{goods.sellerName || '匿名用户'}}</view>
+      <view class="seller-shop" wx:if="{{goods.shopName}}">{{goods.shopName}}</view>
+      <view class="seller-area" wx:if="{{goods.campusArea}}">{{goods.campusArea}}</view>
+    </view>
+    <view class="seller-time">{{goods.createTime}}</view>
+  </view>
+
+  <!-- Description -->
+  <view class="desc-section" wx:if="{{goods.description}}">
+    <view class="section-title">商品描述</view>
+    <view class="desc-content">{{goods.description}}</view>
+  </view>
+
+  <!-- Status info -->
+  <view class="status-section">
+    <view class="section-title">交易信息</view>
+    <van-cell title="状态" value="{{goods.status}}" />
+    <van-cell title="配送方式" value="{{goods.deliveryType}}" />
+    <van-cell title="成色" value="{{goods.condition}}" />
+    <van-cell wx:if="{{goods.campusArea}}" title="校区" value="{{goods.campusArea}}" />
+  </view>
+
+  <!-- Bottom Actions -->
+  <view class="bottom-bar">
+    <van-button type="default" size="small" icon="chat-o" bindtap="onContactTap" wx:if="{{goods.status === '在售'}}">联系卖家</van-button>
+    <van-button type="primary" size="small" icon="cart-o" bindtap="onBuyTap" wx:if="{{goods.status === '在售'}}">立即购买</van-button>
+    <van-button type="default" size="small" disabled wx:if="{{goods.status !== '在售'}}">已{{goods.status === '已售出' ? '售出' : '下架'}}</van-button>
+  </view>
+</view>
+
+<view wx:else>
+  <van-loading />
+</view>

@@ -1,0 +1,8 @@
+.list-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx 0;
+  font-size: 28rpx;
+  color: #969799;
+}

@@ -1,0 +1,48 @@
+<view class="container">
+  <van-cell-group title="商品信息">
+    <van-field label="标题" value="{{ title }}" placeholder="请输入商品标题" maxlength="200" bind:change="onTitleInput" required />
+    <van-field label="描述" value="{{ description }}" type="textarea" placeholder="描述一下你的宝贝吧" maxlength="500" autosize bind:change="onDescInput" />
+    <van-field label="价格" value="{{ price }}" type="digit" placeholder="请输入售价" bind:change="onPriceInput" required />
+    <van-field label="原价" value="{{ originalPrice }}" type="digit" placeholder="选填" bind:change="onOriginalPriceInput" />
+  </van-cell-group>
+
+  <van-cell-group title="商品图片">
+    <view class="upload-wrap">
+      <block wx:for="{{images}}" wx:key="*this">
+        <view class="upload-item">
+          <image class="upload-img" src="{{item}}" mode="aspectFill" />
+          <view class="upload-delete" data-index="{{index}}" bindtap="onDeleteImage">×</view>
+        </view>
+      </block>
+      <view class="upload-item upload-add" bindtap="onChooseImage" wx:if="{{images.length < 9}}">
+        <van-icon name="plus" size="24px" color="#999" />
+        <text class="upload-text">{{uploading ? '上传中...' : '添加图片'}}</text>
+      </view>
+    </view>
+  </van-cell-group>
+
+  <van-cell-group title="商品分类">
+    <van-field label="成色" value="{{condition || '请选择'}}" readonly is-link bind:click="onConditionTap" />
+    <van-field label="分类" value="{{category || '请选择'}}" readonly is-link bind:click="onCategoryTap" />
+    <van-field label="配送方式">
+      <van-radio-group value="{{ deliveryType }}" bind:change="onDeliveryChange" style="display:flex; gap:12px">
+        <van-radio name="自提" checked-color="#1989fa">自提</van-radio>
+        <van-radio name="可送" checked-color="#1989fa">可送</van-radio>
+        <van-radio name="均可" checked-color="#1989fa">均可</van-radio>
+      </van-radio-group>
+    </van-field>
+    <van-field label="校区" value="{{ campusArea }}" placeholder="如：东校区" bind:change="onAreaInput" />
+  </van-cell-group>
+
+  <view class="submit-wrap">
+    <van-button type="primary" block loading="{{submitting}}" bindtap="onSubmit">发布闲置</van-button>
+  </view>
+
+  <!-- Pickers -->
+  <van-popup show="{{showCondition}}" position="bottom" bind:close="onConditionClose">
+    <van-picker columns="{{conditionOptions}}" bind:change="onConditionChange" show-toolbar bind:cancel="onConditionClose" bind:confirm="onConditionClose" />
+  </van-popup>
+  <van-popup show="{{showCategory}}" position="bottom" bind:close="onCategoryClose">
+    <van-picker columns="{{categoryOptions}}" bind:change="onCategoryChange" show-toolbar bind:cancel="onCategoryClose" bind:confirm="onCategoryClose" />
+  </van-popup>
+</view>

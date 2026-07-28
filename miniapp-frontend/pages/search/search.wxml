@@ -1,0 +1,78 @@
+<view class="search-page">
+  <view class="search-bar-wrap">
+    <van-search
+      value="{{searchValue}}"
+      placeholder="搜索商品"
+      focus
+      bind:change="onSearch"
+      bind:search="onSearchConfirm"
+      bind:clear="onSearchClear"
+      show-action
+    />
+  </view>
+
+  <!-- Suggestion dropdown -->
+  <view class="suggest-dropdown" wx:if="{{showSuggestions && suggestions.length > 0}}">
+    <view
+      class="suggest-item"
+      wx:for="{{suggestions}}"
+      wx:key="*this"
+      data-keyword="{{item}}"
+      bindtap="onTapSuggestion"
+    >
+      <van-icon name="search" size="32rpx" color="#999" />
+      <text>{{item}}</text>
+    </view>
+  </view>
+
+  <!-- Loading -->
+  <view class="search-loading" wx:if="{{loading}}">
+    <van-icon name="refresh" size="40rpx" custom-class="loading-icon" />
+    <text>搜索中...</text>
+  </view>
+
+  <!-- Results -->
+  <view wx:if="{{!loading && searched}}" class="search-results">
+    <view wx:if="{{list.length > 0}}" class="goods-grid">
+      <view
+        class="goods-item"
+        wx:for="{{list}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="onTapGoods"
+      >
+        <van-image
+          src="{{item.img || item.image}}"
+          width="100%"
+          height="340rpx"
+          fit="cover"
+          radius="8rpx 8rpx 0 0"
+          class="goods-image"
+        />
+        <view class="goods-info">
+          <view class="goods-name">{{item.name}}</view>
+          <view class="goods-bottom">
+            <text class="goods-price">¥{{item.price}}</text>
+            <text class="goods-sale" wx:if="{{item.sales}}">已售{{item.sales}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <van-empty
+      wx:if="{{list.length === 0}}"
+      description="未找到相关商品"
+      image="search"
+    />
+  </view>
+
+  <!-- Initial placeholder -->
+  <view class="search-placeholder" wx:if="{{!searched && !loading}}">
+    <van-empty description="输入关键词搜索商品" image="search" />
+    <view class="ai-search-tip" bind:tap="onAiSearchTap">
+      <text class="ai-search-icon">🤖</text>
+      <text>试试 AI 智能搜索：描述你想要的商品</text>
+      <van-icon name="arrow" size="14px" color="#999" />
+    </view>
+  </view>
+</view>

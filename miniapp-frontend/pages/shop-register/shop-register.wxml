@@ -1,0 +1,104 @@
+<view class="register-page">
+  <view class="warning-box">
+    <text class="warning-text">重要提示：本平台仅供校外合法商户申请入驻，在校学生不得申请开店。申请需提交经营许可证等证件，审核分为线上初审和线下实地核查两个阶段。</text>
+  </view>
+
+  <van-notice-bar
+    wx:if="{{existingShop}}"
+    text="您已有一家店铺「{{existingShop.name}}」，状态：{{existingShop.status}}"
+    mode="closeable"
+    color="#1989fa"
+    background="#ecf9ff"
+  />
+
+  <view class="form-title">店铺信息</view>
+
+  <van-cell-group>
+    <van-field
+      label="经营类型"
+      value="{{type}}"
+      placeholder="请选择经营类型"
+      is-link
+      readonly
+      bind:click-input="openTypePicker"
+      required
+    />
+    <van-popup show="{{typePickerVisible}}" position="bottom" round custom-style="z-index: 2000">
+      <van-picker
+        columns="{{typeColumns}}"
+        bind:confirm="onTypeConfirm"
+        bind:cancel="onTypeCancel"
+      />
+    </van-popup>
+    <van-field
+      wx:if="{{showCustomType}}"
+      label="自定义类型"
+      value="{{customType}}"
+      placeholder="请输入经营类型，如：文具店、打印店"
+      border="{{true}}"
+      required
+      bind:change="onCustomTypeInput"
+    />
+    <van-field
+      label="店铺名称"
+      value="{{name}}"
+      placeholder="请输入店铺名称"
+      border="{{true}}"
+      bind:change="onNameInput"
+    />
+    <van-field
+      label="店铺简介"
+      value="{{description}}"
+      type="textarea"
+      placeholder="简单介绍一下你的店铺"
+      border="{{true}}"
+      bind:change="onDescInput"
+    />
+    <view class="ai-btn-wrap">
+      <van-button size="small" type="warning" loading="{{aiLoading}}" bind:click="aiGenerateDesc">
+        AI 生成简介
+      </van-button>
+    </view>
+    <van-field
+      label="联系电话"
+      value="{{phone}}"
+      type="number"
+      placeholder="请输入联系电话"
+      border="{{true}}"
+      bind:change="onPhoneInput"
+    />
+    <van-field
+      label="店铺地址"
+      value="{{address}}"
+      placeholder="请输入店铺地址"
+      border="{{true}}"
+      bind:change="onAddressInput"
+    />
+  </van-cell-group>
+
+  <view class="upload-wrap">
+    <view class="upload-label">店铺Logo</view>
+    <van-uploader
+      file-list="{{logoList}}"
+      max-count="1"
+      bind:after-read="onUpload"
+      bind:delete="onDeleteLogo"
+    />
+  </view>
+
+  <view class="upload-wrap">
+    <view class="upload-label">经营许可证</view>
+    <van-uploader
+      file-list="{{licenseList}}"
+      max-count="1"
+      bind:after-read="onLicenseUpload"
+      bind:delete="onDeleteLicense"
+    />
+  </view>
+
+  <view class="btn-area">
+    <van-button type="primary" block round loading="{{loading}}" bind:click="handleSubmit">
+      提交申请
+    </van-button>
+  </view>
+</view>

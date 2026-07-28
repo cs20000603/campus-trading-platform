@@ -1,0 +1,77 @@
+<view class="cart-page">
+  <!-- Cart List -->
+  <view class="cart-list" wx:if="{{cartList.length > 0}}">
+    <van-swipe-cell
+      wx:for="{{cartList}}"
+      wx:key="id"
+      right-width="{{70}}"
+    >
+      <view class="cart-item">
+        <!-- Checkbox -->
+        <van-checkbox
+          class="cart-checkbox"
+          value="{{item.checked}}"
+          data-index="{{index}}"
+          bind:change="onCheckChange"
+        />
+
+        <!-- Image -->
+        <van-image
+          class="cart-image"
+          src="{{item.goodsImg}}"
+          fit="cover"
+          width="80px"
+          height="80px"
+          radius="4px"
+          data-index="{{index}}"
+          bind:tap="onCheckChange"
+        />
+
+        <!-- Info -->
+        <view class="cart-info">
+          <view class="cart-name">{{item.goodsName}}</view>
+          <view class="cart-price">¥{{item.goodsPrice}}</view>
+        </view>
+
+        <!-- Stepper -->
+        <van-stepper
+          value="{{item.num}}"
+          min="{{1}}"
+          max="{{99}}"
+          integer="{{true}}"
+          data-index="{{index}}"
+          bind:change="onStepperChange"
+        />
+
+        <!-- Delete icon -->
+        <view class="delete-icon" data-index="{{index}}" bind:tap="onDelete">
+          <van-icon name="delete-o" size="18px" color="#999" />
+        </view>
+      </view>
+
+      <!-- Swipe Delete -->
+      <view slot="right" class="delete-slot" data-index="{{index}}" bind:tap="onDelete">
+        <text>删除</text>
+      </view>
+    </van-swipe-cell>
+    <view class="swipe-hint">左滑商品可快速删除</view>
+  </view>
+
+  <!-- Empty Cart -->
+  <van-empty wx:else description="购物车是空的" />
+
+  <!-- Submit Bar -->
+  <view class="submit-bar" wx:if="{{cartList.length > 0}}">
+    <view class="check-all" bind:tap="onCheckAllChange">
+      <van-checkbox value="{{checkedAll}}" />
+      <text class="check-all-text">全选</text>
+    </view>
+    <view class="total-info">
+      <text class="total-label">合计:</text>
+      <text class="total-price">¥{{totalPrice}}</text>
+    </view>
+    <view class="checkout-btn {{checkedCount > 0 ? '' : 'disabled'}}" bind:tap="onCheckout">
+      去结算({{checkedCount}})
+    </view>
+  </view>
+</view>

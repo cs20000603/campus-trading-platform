@@ -1,0 +1,68 @@
+.order-comment-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.comment-item {
+  background-color: #fff;
+  margin: 10px;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.item-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.item-price {
+  font-size: 13px;
+  color: #ee0a24;
+  font-weight: bold;
+}
+
+.rate-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.rate-label {
+  font-size: 14px;
+  color: #333;
+  margin-right: 12px;
+}
+
+.rate-text {
+  font-size: 14px;
+  color: #ee0a24;
+  margin-left: 10px;
+}
+
+.content-row {
+  margin-top: 5px;
+}
+
+.submit-wrap {
+  padding: 20px;
+}

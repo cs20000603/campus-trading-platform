@@ -1,0 +1,68 @@
+<view class="order-comment-page">
+  <view class="order-comment-list" wx:if="{{orderItems.length > 0}}">
+    <view class="comment-item" wx:for="{{orderItems}}" wx:key="id">
+      <!-- Item Header -->
+      <view class="item-header">
+        <van-image
+          class="item-img"
+          src="{{item.goodsImg}}"
+          fit="cover"
+          width="60px"
+          height="60px"
+          radius="4px"
+        />
+        <view class="item-info">
+          <view class="item-name">{{item.goodsName}}</view>
+          <view class="item-price">¥{{item.goodsPrice}} x {{item.num}}</view>
+        </view>
+      </view>
+
+      <!-- Rating -->
+      <view class="rate-row">
+        <text class="rate-label">评分</text>
+        <van-rate
+          value="{{commentMap[item.goodsId].score || 0}}"
+          size="24px"
+          data-goodsid="{{item.goodsId}}"
+          bind:change="onScoreChange"
+        />
+        <text class="rate-text" wx:if="{{commentMap[item.goodsId].score > 0}}">
+          {{commentMap[item.goodsId].score}}分
+        </text>
+      </view>
+
+      <!-- Comment Content -->
+      <view class="content-row">
+        <van-field
+          value="{{commentMap[item.goodsId].content || ''}}"
+          type="textarea"
+          placeholder="分享您的使用体验..."
+          autosize
+          maxlength="500"
+          border="{{true}}"
+          data-goodsid="{{item.goodsId}}"
+          bind:change="onContentInput"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- Empty State -->
+  <van-empty wx:if="{{orderItems.length === 0}}" description="暂无订单商品" />
+
+  <!-- Submit Button -->
+  <view class="submit-wrap" wx:if="{{orderItems.length > 0}}">
+    <van-button
+      type="danger"
+      block
+      round
+      loading="{{submitting}}"
+      bind:click="onSubmit"
+    >
+      提交评价
+    </van-button>
+  </view>
+
+  <!-- Bottom Spacer -->
+  <view style="height: 30px;"></view>
+</view>

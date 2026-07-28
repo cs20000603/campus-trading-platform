@@ -1,0 +1,44 @@
+<view class="page">
+  <van-tabs active="{{activeTab}}" bind:change="onTabChange">
+    <van-tab wx:for="{{tabs}}" wx:key="value" title="{{item.label}}" />
+  </van-tabs>
+
+  <view wx:if="{{orders.length === 0}}" class="empty-wrap">
+    <van-empty description="暂无订单" />
+  </view>
+
+  <view class="order-list" wx:if="{{orders.length > 0}}">
+    <view class="order-item" wx:for="{{orders}}" wx:key="id">
+      <view class="order-header">
+        <text class="order-no">订单号：{{item.orderNo}}</text>
+        <text class="order-time">{{item.time}}</text>
+      </view>
+
+      <view class="order-goods" wx:for="{{item.orderDetailList}}" wx:key="goodsId" wx:for-item="detail">
+        <van-image src="{{detail.goodsImg}}" width="60px" height="60px" radius="4rpx" fit="cover" />
+        <view class="goods-info">
+          <view class="goods-name">{{detail.goodsName}}</view>
+          <view class="goods-price">¥{{detail.goodsPrice}} x {{detail.num}}</view>
+        </view>
+      </view>
+
+      <view class="order-footer">
+        <view class="footer-info">
+          <text class="user-info">用户：{{item.userName || '用户' + item.userId}}</text>
+          <text class="deliver-info">{{item.deliverType || '--'}}</text>
+          <text class="order-total">合计：<text class="price">¥{{item.total}}</text></text>
+        </view>
+        <van-tag type="{{item.status === '待接单' ? 'warning' : item.status === '已出货' ? 'primary' : item.status === '已配送' ? '' : item.status === '已完成' ? 'success' : 'danger'}}">
+          {{item.status}}
+        </van-tag>
+      </view>
+
+      <view class="order-actions" wx:if="{{item.status === '待接单' || item.status === '已出货' || item.status === '已配送'}}">
+        <van-button wx:if="{{item.status === '待接单'}}" type="primary" size="small" data-id="{{item.id}}" bind:click="handleAccept">接单</van-button>
+        <van-button wx:if="{{item.deliverType === '自提' && item.status === '已出货'}}" type="success" size="small" data-id="{{item.id}}" bind:click="handleComplete">确认取货</van-button>
+        <van-button wx:if="{{item.deliverType === '外送' && item.status === '已出货'}}" type="success" size="small" data-id="{{item.id}}" bind:click="handleDeliver">开始配送</van-button>
+        <van-button wx:if="{{item.deliverType === '外送' && item.status === '已配送'}}" type="primary" size="small" data-id="{{item.id}}" bind:click="handleComplete">确认送达</van-button>
+      </view>
+    </view>
+  </view>
+</view>

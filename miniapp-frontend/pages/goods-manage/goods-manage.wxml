@@ -1,0 +1,97 @@
+<view class="goods-manage-page">
+  <view class="header-bar">
+    <text class="header-title">商品管理 ({{goodsList.length}})</text>
+    <van-button type="primary" size="small" bind:click="onAddTap">新增商品</van-button>
+  </view>
+
+  <!-- Goods List -->
+  <view wx:if="{{goodsList.length > 0}}">
+    <view class="goods-item" wx:for="{{goodsList}}" wx:key="id">
+      <van-image class="goods-img" src="{{item.img}}" fit="cover" width="80px" height="80px" radius="6px" />
+      <view class="goods-info">
+        <view class="goods-name">{{item.name}}</view>
+        <view class="goods-price-row">
+          <text wx:if="{{item.discountPrice}}" style="text-decoration: line-through; font-size: 22rpx; color: #999">¥{{item.price}}</text>
+          <text class="goods-price">¥{{item.discountPrice || item.price}}</text>
+          <van-tag wx:if="{{item.status === '上架'}}" type="success" size="mini" custom-style="margin-left: 8rpx">上架</van-tag>
+          <van-tag wx:else type="default" size="mini" custom-style="margin-left: 8rpx">下架</van-tag>
+        </view>
+        <view class="goods-meta">
+          <text>库存: {{item.store}}</text>
+          <text>销量: {{item.saleCount || 0}}</text>
+          <text wx:if="{{item.categoryName}}">{{item.categoryName}}</text>
+        </view>
+      </view>
+      <view class="goods-actions">
+        <van-button size="small" plain type="primary" data-item="{{item}}" bind:click="onEditTap">编辑</van-button>
+        <van-button size="small" plain type="danger" data-id="{{item.id}}" bind:click="onDeleteTap" custom-style="margin-top: 10rpx">删除</van-button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Load More -->
+  <view class="load-more" wx:if="{{goodsList.length > 0}}">
+    <text wx:if="{{loading}}">加载中...</text>
+    <text wx:elif="{{!hasMore}}">没有更多了</text>
+  </view>
+
+  <van-empty wx:if="{{goodsList.length === 0 && !loading}}" description="暂无商品，点击上方新增">
+    <van-button type="primary" size="small" bind:click="onAddTap">新增商品</van-button>
+  </van-empty>
+
+  <!-- Add/Edit Form Popup -->
+  <view class="form-overlay" wx:if="{{formVisible}}">
+    <view class="form-container">
+      <view class="form-header">
+        <text>{{formTitle}}</text>
+        <text class="form-close" bind:tap="onFormCancel">✕</text>
+      </view>
+      <scroll-view class="form-body" scroll-y="true">
+        <van-cell-group>
+          <van-field label="名称" value="{{formName}}" placeholder="请输入商品名称" bind:change="onFormNameInput" required />
+          <van-field label="价格" value="{{formPrice}}" type="digit" placeholder="请输入价格" bind:change="onFormPriceInput" required />
+          <van-field label="折扣价" value="{{formDiscountPrice}}" type="digit" placeholder="不填则无折扣" bind:change="onFormDiscountPriceInput" />
+          <van-field label="折扣截止" value="{{formDiscountEnd}}" placeholder="如 2026-12-31 23:59" bind:change="onFormDiscountEndInput" />
+          <van-field label="库存" value="{{formStore}}" type="number" placeholder="请输入库存" bind:change="onFormStoreInput" required />
+          <van-field label="简介" value="{{formDescription}}" type="textarea" placeholder="请输入简介" bind:change="onFormDescInput" autosize />
+            <view class="ai-btn-row">
+              <van-button size="mini" type="warning" loading="{{aiGenerating}}" bind:click="onAiGenerate" custom-class="ai-gen-btn">🤖 AI 生成简介</van-button>
+            </view>
+        </van-cell-group>
+
+        <!-- Category Picker -->
+        <view class="picker-cell" bind:tap="onCategoryPickerTap">
+          <text class="picker-label">分类</text>
+          <text class="picker-value">{{categories[formCategoryIndex] ? categories[formCategoryIndex].name : '请选择'}}</text>
+          <van-icon name="arrow" size="14px" color="#999" />
+        </view>
+
+        <!-- Status -->
+        <van-cell title="状态">
+          <van-radio-group value="{{formStatus}}" bind:change="onStatusChange" direction="horizontal">
+            <van-radio name="上架" custom-style="margin-right: 20rpx">上架</van-radio>
+            <van-radio name="下架">下架</van-radio>
+          </van-radio-group>
+        </van-cell>
+
+        <!-- Image Upload -->
+        <view class="upload-wrap">
+          <view class="upload-label">商品图片</view>
+          <van-uploader file-list="{{formImgList}}" max-count="1" bind:after-read="onUpload" bind:delete="onDeleteImg" />
+        </view>
+      </scroll-view>
+      <view class="form-footer">
+        <van-button block bind:click="onFormCancel">取消</van-button>
+        <van-button type="primary" block loading="{{saving}}" bind:click="onFormSave" custom-style="margin-top: 15rpx">保存</van-button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Category Picker Popup -->
+  <van-popup show="{{categoryPickerVisible}}" position="bottom" round custom-style="z-index: 2000">
+    <van-picker columns="{{categoryNames}}" bind:confirm="onCategoryConfirm" bind:cancel="onCategoryCancel" />
+  </van-popup>
+
+  <!-- Delete Dialog -->
+  <van-dialog id="van-dialog" />
+</view>

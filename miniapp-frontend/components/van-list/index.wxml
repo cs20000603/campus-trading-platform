@@ -1,0 +1,8 @@
+<view class="van-list">
+  <slot></slot>
+  <view id="list-sentinel" class="list-status">
+    <van-loading wx:if="{{loading}}" size="36rpx" />
+    <text wx:if="{{loading}}"> 加载中...</text>
+    <text wx:elif="{{finished}}">{{finishedText}}</text>
+  </view>
+</view>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.IdleWantedMapper接口
+    求购信息(IdleWanted)数据访问层，负责校园闲置交易模块中"求购/我想要"信息的增删改查操作
+    用户发布求购需求，表示自己想要什么东西，是闲置交易的另一种模式（需求驱动）
+-->
+<mapper namespace="com.wll.common.mapper.IdleWantedMapper">
+
+    <!--
+        查询所有求购信息（带分页和条件筛选）
+        查询idle_wanted(求购信息)表的所有列
+        列说明：
+          idle_wanted.* - 求购表的所有列
+        筛选条件支持：标题模糊搜索、分类筛选、状态筛选、用户筛选、校区筛选
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.IdleWanted">
+        select idle_wanted.*
+            from idle_wanted
+        <where>
+            <!-- 按求购标题(title)模糊搜索 -->
+            <if test="title != null"> and idle_wanted.title like concat('%', #{title}, '%')</if>
+            <!-- 按商品分类(category)筛选：如电子产品、书籍等 -->
+            <if test="category != null"> and idle_wanted.category = #{category}</if>
+            <!--
+                按状态(status)筛选
+                例如："求购中"（还在找）、"已买到"（需求满足）、"已关闭"等
+            -->
+            <if test="status != null"> and idle_wanted.status = #{status}</if>
+            <!-- 按用户ID筛选：查看某个用户发布的所有求购信息 -->
+            <if test="userId != null"> and idle_wanted.user_id = #{userId}</if>
+            <!-- 按校区(campus_area)筛选：同校区交易更方便 -->
+            <if test="campusArea != null"> and idle_wanted.campus_area = #{campusArea}</if>
+        </where>
+        <!-- 按创建时间降序排列 -->
+        order by idle_wanted.create_time desc
+    </select>
+
+    <!-- 按主键id查询单条求购信息 -->
+    <select id="selectById" resultType="com.wll.common.entity.IdleWanted">
+        select * from idle_wanted where id = #{id}
+    </select>
+
+    <!-- 按主键id删除求购信息 -->
+    <delete id="deleteById">
+        delete from idle_wanted where id = #{id}
+    </delete>
+
+    <!--
+        插入一条求购信息
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明（共11个字段）：
+          id          - 求购信息唯一编号（主键，自动生成）
+          title       - 求购标题（想要什么）
+          description - 求购描述（详细说明需求）
+          budget      - 预算金额（愿意出多少钱买）
+          category    - 商品分类
+          campus_area - 所在校区（希望在哪个校区交易）
+          user_id     - 发布用户ID（外键，关联user表，谁想买）
+          user_name   - 用户名称（冗余存储）
+          user_avatar - 用户头像（冗余存储）
+          status      - 求购状态（求购中、已买到、已关闭等）
+          create_time - 发布时间
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.IdleWanted" useGeneratedKeys="true">
+        insert into idle_wanted
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="budget != null">budget,</if>
+            <if test="category != null">category,</if>
+            <if test="campusArea != null">campus_area,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="userAvatar != null">user_avatar,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <!-- #{budget}：预算金额 -->
+            <if test="budget != null">#{budget},</if>
+            <if test="category != null">#{category},</if>
+            <if test="campusArea != null">#{campusArea},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="userAvatar != null">#{userAvatar},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新求购信息
+        可更新的字段包括：标题、描述、预算、分类、校区、状态
+        注意：userId(发布者)不允许更新，因为求购信息的发布者不可变更
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.IdleWanted">
+        update idle_wanted
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="budget != null">budget = #{budget},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="campusArea != null">campus_area = #{campusArea},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

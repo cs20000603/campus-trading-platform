@@ -1,0 +1,70 @@
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 0 40rpx;
+  background: #fff;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.logo-text {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #ee0a24;
+  margin-bottom: 16rpx;
+}
+
+.logo-desc {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.login-form {
+  width: 100%;
+}
+
+.btn-area {
+  margin-top: 30rpx;
+  margin-bottom: 40rpx;
+}
+
+.forgot-link {
+  display: block;
+  text-align: right;
+  font-size: 26rpx;
+  color: #1989fa;
+  margin-top: 16rpx;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: #e5e5e5;
+}
+
+.divider-text {
+  padding: 0 30rpx;
+  font-size: 26rpx;
+  color: #999;
+}
+
+.login-tip {
+  display: block;
+  text-align: center;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 24rpx;
+}

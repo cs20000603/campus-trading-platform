@@ -1,0 +1,66 @@
+<view class="order-create-page">
+  <!-- Order Items -->
+  <view class="section">
+    <view class="section-title">商品清单</view>
+    <view class="order-item" wx:for="{{orderItems}}" wx:key="goodsId">
+      <van-image
+        class="order-item-img"
+        src="{{item.goodsImg}}"
+        fit="cover"
+        width="60px"
+        height="60px"
+        radius="4px"
+      />
+      <view class="order-item-info">
+        <view class="order-item-name">{{item.goodsName}}</view>
+        <view class="order-item-price">
+          <text class="price">¥{{item.goodsPrice}}</text>
+          <text class="order-item-num">x{{item.num}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Delivery Type -->
+  <view class="section">
+    <view class="section-title">配送方式</view>
+    <van-radio-group
+      value="{{deliverType}}"
+      direction="horizontal"
+      bind:change="onDeliverTypeChange"
+    >
+      <van-radio name="自提" label-position="left">自提</van-radio>
+      <van-radio name="外送" label-position="left" custom-class="radio-item">外送</van-radio>
+    </van-radio-group>
+  </view>
+
+  <!-- Address Input (only for 外送) -->
+  <view class="section" wx:if="{{showAddress}}">
+    <view class="section-title">收货地址</view>
+    <van-field
+      value="{{address}}"
+      placeholder="请输入详细收货地址"
+      border="{{true}}"
+      bind:change="onAddressInput"
+    />
+  </view>
+
+  <!-- Total -->
+  <view class="total-section">
+    <text class="total-label">合计：</text>
+    <text class="total-price">¥{{totalPrice}}</text>
+  </view>
+
+  <!-- Submit Button -->
+  <view class="submit-wrap">
+    <van-button
+      type="danger"
+      block
+      round
+      loading="{{submitting}}"
+      bind:click="onSubmitOrder"
+    >
+      提交订单
+    </van-button>
+  </view>
+</view>

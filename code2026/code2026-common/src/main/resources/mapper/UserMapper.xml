@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.UserMapper接口
+    用户(User)数据访问层，负责用户账户的增删改查操作
+    这是整个系统最基础的数据访问层，用户数据是所有业务的核心
+-->
+<mapper namespace="com.wll.common.mapper.UserMapper">
+
+    <!--
+        查询所有用户（带分页和条件筛选）
+        查询user(用户)表的所有列
+        列说明：
+          id       - 用户唯一编号（主键）
+          username - 登录用户名（用于系统登录的唯一标识）
+          password - 登录密码（应加密存储，如BCrypt/MD5）
+          name     - 用户昵称/显示名称
+          avatar   - 用户头像图片URL
+          role     - 用户角色（如：USER普通用户、ADMIN管理员、SHOP商家等）
+          account  - 账户余额（用户钱包金额，可用于购物消费）
+          phone    - 手机号码（可用于登录和找回密码）
+          openid   - 微信小程序OpenID（用于微信登录绑定）
+          token    - 登录令牌（JWT Token或其他认证令牌，用于请求鉴权）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.User">
+        select * from `user`
+        <where>
+            <!-- 按用户昵称模糊搜索 -->
+            <if test="name != null">name like concat('%', #{name}, '%')</if>
+        </where>
+        <!-- 按id降序排列 -->
+        order by id desc
+    </select>
+
+    <!--
+        按用户名查询用户
+        用于登录验证：根据username查找用户，验证密码是否正确
+        username通常是唯一的，此方法返回单个User对象而非列表
+    -->
+    <select id="selectByUsername" resultType="com.wll.common.entity.User">
+        select * from `user` where username = #{username}
+    </select>
+
+    <!-- 按主键id查询单个用户 -->
+    <select id="selectById" resultType="com.wll.common.entity.User">
+        select * from `user` where id = #{id}
+    </select>
+
+    <!--
+        按手机号查询用户
+        用于手机号登录验证
+        手机号通常也是唯一的（系统中一个手机号只能注册一个账号）
+    -->
+    <select id="selectByPhone" resultType="com.wll.common.entity.User">
+        select * from `user` where phone = #{phone}
+    </select>
+
+    <!--
+        按微信OpenID查询用户
+        用于微信小程序登录时，根据微信返回的OpenID查找对应的用户
+        OpenID是微信用户在小程序中的唯一标识
+        如果找到用户则直接登录，未找到则需要先注册绑定
+    -->
+    <select id="selectByOpenid" resultType="com.wll.common.entity.User">
+        select * from `user` where openid = #{openid}
+    </select>
+
+    <!-- 按主键id删除用户 -->
+    <delete id="deleteById">
+        delete from `user` where id = #{id}
+    </delete>
+
+    <!--
+        插入一个新用户（用户注册时调用）
+        注意：没有useGeneratedKeys属性，意味着不获取自动生成的主键
+        列说明见上方selectAll查询注释
+        注意：id未在插入列表中，由数据库AUTO_INCREMENT自动生成
+        parameterType指定传入的是User实体对象
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.User">
+        insert into `user` (username, password, name, avatar, role, account, phone, openid, token)
+        values (#{username}, #{password}, #{name}, #{avatar}, #{role}, #{account}, #{phone}, #{openid}, #{token})
+    </insert>
+
+    <!--
+        按主键id更新用户信息
+        注意：没有parameterType属性（可省略，MyBatis会自动推断）
+        使用set标签动态更新，只更新传入的非null字段
+        可更新的字段：用户名、密码、昵称、头像、角色、余额、手机号、OpenID、Token
+        常见场景：
+          1. 修改个人资料（昵称、头像、手机号）
+          2. 修改密码
+          3. 充值后更新账户余额(account)
+          4. 管理员修改用户角色(role)
+          5. 微信登录后更新openid和token
+          6. 登录成功后更新token
+    -->
+    <update id="updateById">
+        update `user`
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <!-- 更新密码（修改密码功能） -->
+            <if test="password != null">password = #{password},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <!-- 更新角色（管理员修改用户权限） -->
+            <if test="role != null">role = #{role},</if>
+            <!-- 更新账户余额（充值/消费后） -->
+            <if test="account != null">account = #{account},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <!-- 更新微信OpenID（微信登录绑定时） -->
+            <if test="openid != null">openid = #{openid},</if>
+            <!-- 更新登录Token（登录成功或登出时） -->
+            <if test="token != null">token = #{token},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

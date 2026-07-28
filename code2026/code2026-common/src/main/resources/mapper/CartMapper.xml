@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.CartMapper接口
+    购物车(Cart)数据访问层，负责购物车的增删改查操作
+-->
+<mapper namespace="com.wll.common.mapper.CartMapper">
+
+    <!--
+        查询所有购物车记录（带分页和条件筛选）
+        LEFT JOIN goods商品表，获取购物车中商品的名称、图片和价格信息
+        查询列说明：
+          cart.*            - 购物车表的所有列
+          goods.name        - 商品名称（取别名goodsName）
+          goods.img         - 商品图片（取别名goodsImg）
+          goods.price       - 商品价格（取别名goodsPrice）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Cart">
+        select cart.*, goods.name as goodsName, goods.img as goodsImg, goods.price as goodsPrice from `cart`
+        <!--
+            LEFT JOIN goods ON cart.goods_id = goods.id
+            左连接商品表：将购物车记录与对应的商品信息关联起来
+            即使商品被删除，购物车记录依然保留
+        -->
+        left join goods on cart.goods_id = goods.id
+        <!--
+            where动态条件：
+            按userId筛选——只能看到当前登录用户自己的购物车
+        -->
+        <where>
+            <!-- 如果传入了userId(用户ID)，则按user_id过滤，实现购物车数据隔离 -->
+            <if test="userId != null"> and cart.user_id = #{userId}</if>
+        </where>
+        <!-- 按购物车id降序排列，最新添加的在前面 -->
+        order by cart.id desc
+    </select>
+
+    <!-- 按主键id查询单条购物车记录 -->
+    <select id="selectById" resultType="com.wll.common.entity.Cart">
+        select * from `cart` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除购物车记录（从购物车中移除某商品） -->
+    <delete id="deleteById">
+        delete from `cart` where id = #{id}
+    </delete>
+
+    <!--
+        插入一条购物车记录（向购物车添加商品）
+        useGeneratedKeys="true"：自动获取数据库生成的主键
+        列说明：
+          id       - 购物车记录唯一编号（主键）
+          goods_id - 商品ID（外键，表示添加了哪个商品到购物车）
+          num      - 商品数量（购买数量）
+          user_id  - 用户ID（外键，表示这个购物车属于哪个用户）
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Cart" useGeneratedKeys="true">
+        insert into `cart`
+        <!-- 动态构建插入的列名列表 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="goodsId != null">goods_id,</if>
+            <if test="num != null">num,</if>
+            <if test="userId != null">user_id,</if>
+        </trim>
+        values
+        <!-- 动态构建插入的值列表，与列名顺序一一对应 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="goodsId != null">#{goodsId},</if>
+            <if test="num != null">#{num},</if>
+            <if test="userId != null">#{userId},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新购物车记录（如修改商品数量等）
+        使用set标签只更新传入的非null字段
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Cart">
+        update `cart`
+        <set>
+            <if test="id != null">
+                id = #{id},
+            </if>
+            <if test="goodsId != null">
+                goods_id = #{goodsId},
+            </if>
+            <!-- 更新num字段（修改商品购买数量） -->
+            <if test="num != null">
+                num = #{num},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

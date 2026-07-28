@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD，定义允许的XML元素和属性
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.CategoryMapper接口
+    商品分类(Category)数据访问层，负责商品分类的增删改查操作
+-->
+<mapper namespace="com.wll.common.mapper.CategoryMapper">
+
+    <!--
+        查询所有分类（带分页和条件筛选）
+        查询category(商品分类)表的所有列
+        列说明：
+          id        - 分类唯一编号（主键）
+          name      - 分类名称（如：电子产品、服装、食品等）
+          shop_type - 所属店铺类型（不同类型店铺有不同的分类体系）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Category">
+        select * from `category`
+        <where>
+            <!-- 如果传入分类名称name，则按名称模糊搜索 -->
+            <if test="name != null"> and name like concat('%', #{name}, '%')</if>
+            <!-- 如果传入店铺类型shopType，则按店铺类型精确筛选 -->
+            <if test="shopType != null"> and shop_type = #{shopType}</if>
+        </where>
+        <!-- 按id降序排列 -->
+        order by id desc
+    </select>
+
+    <!-- 按主键id查询单个分类 -->
+    <select id="selectById" resultType="com.wll.common.entity.Category">
+        select * from `category` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除分类 -->
+    <delete id="deleteById">
+        delete from `category` where id = #{id}
+    </delete>
+
+    <!--
+        插入新分类
+        列说明：
+          id        - 分类编号（主键，可自动生成）
+          name      - 分类名称
+          shop_type - 店铺类型（指定此分类属于哪种类型的店铺）
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Category" useGeneratedKeys="true">
+        insert into `category`
+        <!-- 动态拼接列名 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null">name,</if>
+            <if test="shopType != null">shop_type,</if>
+        </trim>
+        values
+        <!-- 动态拼接值 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null">#{name},</if>
+            <if test="shopType != null">#{shopType},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新分类信息
+        使用set标签实现部分字段更新
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Category">
+        update `category`
+        <set>
+            <if test="id != null">
+                id = #{id},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="shopType != null">
+                shop_type = #{shopType},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--
+        按店铺类型查询分类列表
+        这是额外自定义的查询方法，根据店铺类型获取该类型下的所有分类
+        例如：查询"电子产品"店铺类型下有哪些分类
+    -->
+    <select id="selectByShopType" resultType="com.wll.common.entity.Category">
+        select * from `category` where shop_type = #{shopType}
+    </select>
+
+</mapper>

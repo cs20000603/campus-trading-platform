@@ -1,0 +1,110 @@
+<view class="goods-detail-page" wx:if="{{goods.id}}">
+  <!-- Product Image -->
+  <view class="goods-image-wrap" bind:tap="onPreviewImage">
+    <van-image
+      class="goods-image"
+      src="{{goods.img}}"
+      fit="cover"
+      width="100%"
+      height="375px"
+    />
+  </view>
+
+  <!-- Product Info -->
+  <view class="goods-info-card">
+    <view class="goods-name">{{goods.name}}</view>
+    <view class="goods-price-row">
+      <text wx:if="{{goods.discountPrice}}" style="text-decoration: line-through; font-size: 28rpx; color: #999; margin-right: 10rpx">¥{{goods.price}}</text>
+      <text class="price">¥{{goods.discountPrice || goods.price}}</text>
+      <text wx:if="{{goods.discountPrice}}" style="color: red; font-size: 22rpx; margin-left: 8rpx">限时折扣</text>
+      <text class="goods-sale">已售{{goods.saleCount || 0}}件</text>
+      <text class="goods-stock">库存: {{goods.store || 99}}</text>
+    </view>
+    <view class="goods-desc" wx:if="{{goods.description}}">{{goods.description}}</view>
+  </view>
+
+  <!-- Quantity Stepper -->
+  <view class="stepper-row">
+    <text class="stepper-label">数量</text>
+    <van-stepper
+      value="{{num}}"
+      min="{{1}}"
+      max="{{99}}"
+      integer="{{true}}"
+      bind:change="onStepperChange"
+    />
+  </view>
+
+  <!-- Tab Switch -->
+  <view class="tab-bar">
+    <view
+      class="tab-item {{activeTab === 'detail' ? 'active' : ''}}"
+      data-tab="detail"
+      bind:tap="onTabChange"
+    >商品详情</view>
+    <view
+      class="tab-item {{activeTab === 'comment' ? 'active' : ''}}"
+      data-tab="comment"
+      bind:tap="onTabChange"
+    >商品评价 ({{comments.length}})</view>
+  </view>
+
+  <!-- Detail Tab Content -->
+  <view class="tab-content" wx:if="{{activeTab === 'detail'}}">
+    <view wx:if="{{goods.content}}">
+      <rich-text nodes="{{goods.content}}" class="goods-rich-text"></rich-text>
+    </view>
+    <van-empty wx:else description="暂无详情" />
+  </view>
+
+  <!-- Comment Tab Content -->
+  <view class="tab-content" wx:if="{{activeTab === 'comment'}}">
+    <view wx:if="{{comments.length > 0}}">
+      <view class="comment-item" wx:for="{{comments}}" wx:key="id">
+        <view class="comment-header">
+          <image class="comment-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+          <view class="comment-user-info">
+            <text class="comment-name">{{item.userName || '匿名用户'}}</text>
+            <van-rate
+              value="{{item.score || 5}}"
+              size="12px"
+              readonly="{{true}}"
+              gutter="2px"
+            />
+          </view>
+          <text class="comment-time">{{item.time}}</text>
+        </view>
+        <view class="comment-content">{{item.content}}</view>
+        <view class="comment-goods" wx:if="{{item.goodsImg}}">
+          <image class="comment-goods-img" src="{{item.goodsImg}}" mode="aspectFill" />
+          <text class="comment-goods-name">{{item.goodsName}}</text>
+        </view>
+      </view>
+    </view>
+    <van-empty wx:else description="暂无评价" />
+    <view class="load-more" wx:if="{{comments.length > 0}}">
+      <text wx:if="{{commentLoading}}">加载中...</text>
+      <text wx:elif="{{!commentHasMore}}">没有更多了</text>
+    </view>
+  </view>
+
+  <!-- Bottom Bar -->
+  <view class="bottom-bar">
+    <view class="favorite-btn" bind:tap="onCollectToggle">
+      <van-icon
+        name="{{isCollected ? 'star' : 'star-o'}}"
+        size="22px"
+        color="{{isCollected ? '#ee0a24' : '#666'}}"
+      />
+      <text class="favorite-text" style="color: {{isCollected ? '#ee0a24' : '#666'}}">
+        {{isCollected ? '已收藏' : '收藏'}}
+      </text>
+    </view>
+    <view class="cart-btn" bind:tap="onAddToCart">
+      <text>加入购物车</text>
+    </view>
+    <view class="buy-btn" bind:tap="onBuyNow">
+      <text>立即购买</text>
+    </view>
+  </view>
+</view>

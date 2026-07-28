@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.OrdersMapper接口
+    订单(Orders)数据访问层，负责商城订单的增删改查操作
+    一个订单包含订单基本信息（金额、状态、收货地址等），具体商品明细在order_detail表中
+-->
+<mapper namespace="com.wll.common.mapper.OrdersMapper">
+
+    <!--
+        查询所有订单（带分页和多条件筛选）
+        LEFT JOIN user用户表 和 order_detail订单详情表
+        查询列说明：
+          orders.*     - 订单表的所有列
+          user.name    - 下单用户名称（取别名userName）
+        使用GROUP BY orders.id对订单进行去重
+        因为一个订单可能关联多个order_detail记录，JOIN后会产生重复行，GROUP BY消除重复
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Orders">
+        select orders.*, user.name as userName from `orders`
+        <!-- LEFT JOIN user：关联下单用户的信息 -->
+        left join user on orders.user_id = user.id
+        <!--
+            LEFT JOIN order_detail ON order_detail.order_id = orders.id
+            关联订单详情表，用于按商品名称搜索订单（见下方where条件）
+        -->
+        left join order_detail on order_detail.order_id = orders.id
+        <where>
+            <!-- 按订单号(order_no)模糊搜索 -->
+            <if test="orderNo != null"> and orders.order_no like concat('%', #{orderNo}, '%')</if>
+            <!-- 按商品名称(goods_name)模糊搜索：通过order_detail表，搜索包含某商品的订单 -->
+            <if test="goodsName != null"> and order_detail.goods_name like concat('%', #{goodsName}, '%')</if>
+            <!-- 按用户ID筛选：查看某个用户的所有订单 -->
+            <if test="userId != null"> and orders.user_id = #{userId}</if>
+            <!-- 按店铺ID筛选：查看某个店铺收到的所有订单 -->
+            <if test="shopId != null"> and orders.shop_id = #{shopId}</if>
+            <!--
+                按订单状态(status)筛选
+                test中 '!='' 表示值不为空字符串
+                常见状态：待付款、待发货、待收货、已完成、已取消、已退款等
+            -->
+            <if test="status != null and status != ''"> and orders.status = #{status}</if>
+        </where>
+        <!--
+            GROUP BY orders.id：按订单ID分组
+            因为与order_detail JOIN后，一个订单如果包含多个商品，会产生多行数据
+            GROUP BY可以合并为一行，确保每个订单只出现一次
+        -->
+        group by orders.id
+        <!-- 按订单id降序排列，最新订单在前 -->
+        order by orders.id desc
+    </select>
+
+    <!-- 按主键id查询单个订单 -->
+    <select id="selectById" resultType="com.wll.common.entity.Orders">
+        select * from `orders` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除订单 -->
+    <delete id="deleteById">
+        delete from `orders` where id = #{id}
+    </delete>
+
+    <!--
+        插入一条新订单（用户下单时创建）
+        useGeneratedKeys="true" keyProperty="id"：
+        插入后自动获取数据库生成的id，并回填到传入对象的id属性中
+        keyProperty="id"明确指定主键属性名为id
+        列说明：
+          id           - 订单唯一编号（主键，自动生成）
+          order_no     - 订单号（业务编号，通常是时间戳+随机数生成的唯一编号）
+          total        - 订单总金额（所有商品金额之和）
+          user_id      - 下单用户ID（外键，关联user表，谁下的单）
+          status       - 订单状态（待付款、待发货、待收货、已完成等）
+          time         - 下单时间
+          deliver_type - 配送方式（快递、自取等）
+          address      - 收货地址（邮寄地址）
+          deliver      - 快递/物流信息（快递公司+快递单号等）
+          shop_id      - 所属店铺ID（外键，关联shop表，订单属于哪个店铺）
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Orders" useGeneratedKeys="true" keyProperty="id">
+        insert into `orders`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="orderNo != null">order_no,</if>
+            <if test="total != null">total,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="status != null">status,</if>
+            <if test="time != null">time,</if>
+            <if test="deliverType != null">deliver_type,</if>
+            <if test="address != null">address,</if>
+            <if test="deliver != null">deliver,</if>
+            <if test="shopId != null">shop_id,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <!-- #{orderNo}：订单号 -->
+            <if test="orderNo != null">#{orderNo},</if>
+            <!-- #{total}：订单总金额 -->
+            <if test="total != null">#{total},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="time != null">#{time},</if>
+            <if test="deliverType != null">#{deliverType},</if>
+            <if test="address != null">#{address},</if>
+            <if test="deliver != null">#{deliver},</if>
+            <if test="shopId != null">#{shopId},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新订单信息（如修改订单状态、填写物流信息等）
+        可更新的字段：订单号、总金额、用户、状态、时间、配送方式、地址、物流、店铺
+        注意：实际业务中某些字段（如订单号、用户）通常创建后不再修改
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Orders">
+        update `orders`
+        <set>
+            <if test="id != null">
+                id = #{id},
+            </if>
+            <if test="orderNo != null">
+                order_no = #{orderNo},
+            </if>
+            <if test="total != null">
+                total = #{total},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <!-- 更新订单状态(如：将"待发货"改为"待收货") -->
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="time != null">
+                time = #{time},
+            </if>
+            <if test="deliverType != null">
+                deliver_type = #{deliverType},
+            </if>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <!-- 更新物流信息(如填写快递公司和快递单号) -->
+            <if test="deliver != null">
+                deliver = #{deliver},
+            </if>
+            <if test="shopId != null">
+                shop_id = #{shopId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

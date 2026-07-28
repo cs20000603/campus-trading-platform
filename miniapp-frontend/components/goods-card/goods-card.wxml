@@ -1,0 +1,21 @@
+<view class="goods-card" bindtap="onTap">
+  <van-image
+    src="{{goods.img || goods.image}}"
+    width="100%"
+    height="340rpx"
+    fit="cover"
+    radius="8rpx 8rpx 0 0"
+    class="goods-img"
+  />
+  <view class="goods-card-info">
+    <view class="goods-card-name">{{goods.name || goods.goodsName}}</view>
+    <view class="goods-card-bottom">
+      <text wx:if="{{goods.discountPrice}}" style="text-decoration: line-through; font-size: 20rpx; color: #999">¥{{goods.price || goods.goodsPrice}}</text>
+      <text class="goods-card-price">¥{{goods.discountPrice || goods.price || goods.goodsPrice}}</text>
+      <text wx:if="{{goods.discountPrice}}" style="color: #fff; background-color: red; font-size: 18rpx; padding: 2rpx 6rpx; border-radius: 4rpx; margin-left: 6rpx">折扣</text>
+      <text class="goods-card-sales" wx:if="{{goods.sales || goods.salesCount}}">
+        已售{{goods.sales || goods.salesCount}}
+      </text>
+    </view>
+  </view>
+</view>

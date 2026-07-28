@@ -1,0 +1,40 @@
+<view class="collect-page">
+  <van-list
+    finished="{{finished}}"
+    finished-text="没有更多了"
+    loading="{{loading}}"
+    bind:load="onLoadMore"
+  >
+    <van-cell-group wx:if="{{list.length > 0}}">
+      <van-swipe-cell
+        wx:for="{{list}}"
+        wx:key="id"
+        right-width="{{130}}"
+      >
+        <view class="collect-card" data-goods-id="{{item.goodsId}}" bindtap="onTapCard">
+          <van-image
+            src="{{item.goodsImg}}"
+            width="160rpx"
+            height="160rpx"
+            fit="cover"
+            radius="8rpx"
+          />
+          <view class="collect-info">
+            <view class="collect-name">{{item.goodsName}}</view>
+            <view class="collect-price">¥{{item.goodsPrice}}</view>
+            <view class="collect-time">{{item.time}}</view>
+          </view>
+        </view>
+        <view slot="right" class="swipe-delete" data-id="{{item.id}}" bindtap="onUncollect">
+          取消收藏
+        </view>
+      </van-swipe-cell>
+    </van-cell-group>
+
+    <van-empty
+      wx:if="{{!loading && list.length === 0}}"
+      description="暂无收藏"
+      image="star-o"
+    />
+  </van-list>
+</view>

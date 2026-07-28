@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.IdleGoodsMapper接口
+    闲置商品(IdleGoods)数据访问层，负责校园闲置交易模块中闲置商品的增删改查操作
+    这是校园二手交易平台的核心功能模块
+-->
+<mapper namespace="com.wll.common.mapper.IdleGoodsMapper">
+
+    <!--
+        查询所有闲置商品（带分页和多个条件筛选）
+        LEFT JOIN shop店铺表，获取商品所属店铺的名称
+        查询列说明：
+          idle_goods.* - 闲置商品表的所有列
+          shop.name    - 店铺名称（取别名shopName）
+        筛选条件支持：标题模糊搜索、成色筛选、分类筛选、校区筛选、状态筛选、卖家筛选、配送方式筛选
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.IdleGoods">
+        select idle_goods.*, shop.name as shopName
+            from idle_goods
+            <!-- LEFT JOIN shop：关联店铺信息，获取闲置商品所属店铺的名称 -->
+            left join shop on idle_goods.shop_id = shop.id
+        <where>
+            <!-- 按标题(title)模糊搜索 -->
+            <if test="title != null"> and idle_goods.title like concat('%', #{title}, '%')</if>
+            <!--
+                按商品成色(condition)筛选
+                例如："全新"、"99新"、"9成新"、"8成新"等，表示商品新旧程度
+            -->
+            <if test="condition != null"> and idle_goods.condition = #{condition}</if>
+            <!-- 按商品分类(category)筛选，如：电子产品、书籍、生活用品等 -->
+            <if test="category != null"> and idle_goods.category = #{category}</if>
+            <!--
+                按校区(campus_area)筛选
+                校园二手交易中，校区是很重要的筛选条件，买家倾向于同校交易
+            -->
+            <if test="campusArea != null"> and idle_goods.campus_area = #{campusArea}</if>
+            <!--
+                按商品状态(status)筛选
+                例如："在售"（正在出售）、"已售出"、"已下架"等
+            -->
+            <if test="status != null"> and idle_goods.status = #{status}</if>
+            <!-- 按卖家ID(seller_id)筛选：查看某个卖家发布的所有闲置商品 -->
+            <if test="sellerId != null"> and idle_goods.seller_id = #{sellerId}</if>
+            <!--
+                按配送方式(delivery_type)筛选
+                例如："自取"（当面交易）、"快递"、"都可以"等
+            -->
+            <if test="deliveryType != null"> and idle_goods.delivery_type = #{deliveryType}</if>
+        </where>
+        <!-- 按创建时间降序排列，最新发布的在前 -->
+        order by idle_goods.create_time desc
+    </select>
+
+    <!--
+        按主键id查询单个闲置商品（同样LEFT JOIN店铺表获取店铺名称）
+    -->
+    <select id="selectById" resultType="com.wll.common.entity.IdleGoods">
+        select idle_goods.*, shop.name as shopName
+            from idle_goods
+            left join shop on idle_goods.shop_id = shop.id
+            where idle_goods.id = #{id}
+    </select>
+
+    <!-- 按主键id删除闲置商品 -->
+    <delete id="deleteById">
+        delete from idle_goods where id = #{id}
+    </delete>
+
+    <!--
+        插入一件闲置商品
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明（共16个字段）：
+          id             - 闲置商品唯一编号（主键，自动生成）
+          title          - 闲置商品标题（简短名称）
+          description    - 闲置商品描述（详细介绍商品情况）
+          images         - 商品图片（多张图片的URL，可能是JSON数组或逗号分隔）
+          price          - 售价（想要卖的价格）
+          original_price - 原价（购买时的价格，用于展示性价比）
+          condition      - 商品成色（新旧程度描述，加反引号因为condition是MySQL保留字）
+          delivery_type  - 配送/交易方式（自取、快递等）
+          campus_area    - 所在校区（商品所在的校园区域）
+          category       - 商品分类（电子产品、书籍、衣物等）
+          status         - 商品状态（在售、已售出、已下架等）
+          seller_id      - 卖家用户ID（外键，关联user表，谁在卖）
+          seller_name    - 卖家名称（冗余存储，方便显示，避免JOIN查询）
+          seller_avatar  - 卖家头像（冗余存储）
+          shop_id        - 所属店铺ID（外键，关联shop表）
+          views          - 浏览次数
+          create_time    - 发布时间（创建时间）
+          sold_time      - 售出时间（交易完成时间）
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.IdleGoods" useGeneratedKeys="true">
+        insert into idle_goods
+        <!-- 动态拼接列名列表 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="images != null">images,</if>
+            <if test="price != null">price,</if>
+            <if test="originalPrice != null">original_price,</if>
+            <!-- condition是MySQL关键字，需要用反引号包裹 -->
+            <if test="condition != null">`condition`,</if>
+            <if test="deliveryType != null">delivery_type,</if>
+            <if test="campusArea != null">campus_area,</if>
+            <if test="category != null">category,</if>
+            <if test="status != null">status,</if>
+            <if test="sellerId != null">seller_id,</if>
+            <if test="sellerName != null">seller_name,</if>
+            <if test="sellerAvatar != null">seller_avatar,</if>
+            <if test="shopId != null">shop_id,</if>
+            <if test="views != null">views,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="soldTime != null">sold_time,</if>
+        </trim>
+        values
+        <!-- 动态拼接值列表，与列名顺序一一对应 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="images != null">#{images},</if>
+            <if test="price != null">#{price},</if>
+            <if test="originalPrice != null">#{originalPrice},</if>
+            <if test="condition != null">#{condition},</if>
+            <if test="deliveryType != null">#{deliveryType},</if>
+            <if test="campusArea != null">#{campusArea},</if>
+            <if test="category != null">#{category},</if>
+            <if test="status != null">#{status},</if>
+            <if test="sellerId != null">#{sellerId},</if>
+            <if test="sellerName != null">#{sellerName},</if>
+            <if test="sellerAvatar != null">#{sellerAvatar},</if>
+            <if test="shopId != null">#{shopId},</if>
+            <if test="views != null">#{views},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="soldTime != null">#{soldTime},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新闲置商品信息
+        使用set标签动态更新，只更新传入的非null字段
+        注意：seller_id(卖家ID)不允许更新（不能换卖家）
+        但sold_time(售出时间)可更新（交易完成时设置）
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.IdleGoods">
+        update idle_goods
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="images != null">images = #{images},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <!-- condition用反引号包裹因为是MySQL保留字 -->
+            <if test="condition != null">`condition` = #{condition},</if>
+            <if test="deliveryType != null">delivery_type = #{deliveryType},</if>
+            <if test="campusArea != null">campus_area = #{campusArea},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="sellerName != null">seller_name = #{sellerName},</if>
+            <if test="sellerAvatar != null">seller_avatar = #{sellerAvatar},</if>
+            <if test="shopId != null">shop_id = #{shopId},</if>
+            <if test="soldTime != null">sold_time = #{soldTime},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

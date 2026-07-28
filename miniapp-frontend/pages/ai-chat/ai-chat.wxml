@@ -1,0 +1,28 @@
+<view class="ai-chat-page">
+  <!-- Mode Tabs -->
+  <view class="mode-tabs">
+    <view class="mode-item {{mode === 'chat' ? 'active' : ''}}" data-mode="chat" bind:tap="onModeChange">智能问答</view>
+    <view class="mode-item {{mode === 'desc' ? 'active' : ''}}" data-mode="desc" bind:tap="onModeChange">商品描述</view>
+    <view class="mode-item {{mode === 'search' ? 'active' : ''}}" data-mode="search" bind:tap="onModeChange">智能搜索</view>
+  </view>
+
+  <!-- Message List -->
+  <scroll-view class="msg-list" id="msg-list" scroll-y scroll-into-view="msg-{{messages.length - 1}}" scroll-with-animation>
+    <view class="msg-item" wx:for="{{messages}}" wx:key="index" id="msg-{{index}}">
+      <view class="msg-bubble {{item.role === 'user' ? 'msg-user' : 'msg-ai'}}">
+        <text>{{item.content}}</text>
+      </view>
+    </view>
+    <view wx:if="{{loading}}" class="msg-item">
+      <view class="msg-bubble msg-ai">
+        <text>思考中...</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- Input Bar -->
+  <view class="input-bar">
+    <input class="input-field" value="{{input}}" placeholder="{{mode === 'desc' ? '输入商品名称...' : mode === 'search' ? '描述你想找的商品...' : '输入你的问题...'}}" bindinput="onInput" confirm-type="send" bindconfirm="onSend" disabled="{{loading}}" />
+    <van-button type="primary" size="small" bind:click="onSend" loading="{{loading}}" custom-class="send-btn">发送</van-button>
+  </view>
+</view>

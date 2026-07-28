@@ -1,0 +1,136 @@
+<view class="manage-page">
+  <block wx:if="{{shop}}">
+    <!-- Shop Header -->
+    <view class="shop-header">
+      <van-image
+        src="{{shop.logo || '/images/default-avatar.png'}}"
+        width="80px"
+        height="80px"
+        radius="12rpx"
+        fit="cover"
+      />
+      <view class="shop-header-info">
+        <view class="shop-name">{{shop.name}}</view>
+        <van-tag type="{{shop.status === '营业中' ? 'success' : shop.status === '线上审核中' ? 'warning' : shop.status === '线下审核中' ? 'primary' : 'danger'}}" size="medium">
+          {{shop.status}}
+        </van-tag>        <van-tag wx:if="{{shop.type}}" type="primary" size="medium" custom-style="margin-left: 10rpx">
+          {{shop.type}}
+        </van-tag>
+      </view>
+    </view>
+
+    <!-- Shop Info -->
+    <van-cell-group custom-class="info-group">
+      <van-cell title="店铺简介" value="{{shop.description || '暂无'}}" />
+      <van-cell title="联系电话" value="{{shop.phone || '暂无'}}" />
+      <van-cell title="店铺地址" value="{{shop.address || '暂无'}}" />
+      <van-cell title="创建时间" value="{{shop.createTime || '暂无'}}" />
+    </van-cell-group>
+
+    <!-- 驳回提示 -->
+    <view class="reject-box" wx:if="{{shop.status === '审核拒绝'}}">
+      <view class="reject-title">申请被驳回</view>
+      <view class="reject-reason" wx:if="{{shop.rejectReason}}">修改意见：{{shop.rejectReason}}</view>
+      <van-button type="primary" size="small" style="margin-top: 15rpx" bind:click="onEditTap">修改并重新提交</van-button>
+    </view>
+
+    <!-- Actions -->
+    <view class="action-wrap">
+      <van-button
+        type="primary"
+        block
+        icon="edit"
+        wx:if="{{shop.status === '营业中'}}"
+        bind:click="onEditTap"
+      >
+        编辑店铺信息
+      </van-button>
+      <van-button
+        type="primary"
+        block
+        icon="shop-o"
+        style="margin-top: 20rpx"
+        wx:if="{{shop.status === '营业中'}}"
+        bind:click="onManageGoodsTap"
+      >
+        管理商品
+      </van-button>
+      <van-button
+        type="warning"
+        block
+        icon="records"
+        style="margin-top: 20rpx"
+        wx:if="{{shop.status === '营业中'}}"
+        bind:click="onShopOrdersTap"
+      >
+        店铺订单
+      </van-button>
+    </view>
+
+    <!-- Edit Form (popup style inline) -->
+    <view class="edit-wrap" wx:if="{{editing}}">
+      <view class="edit-title">编辑店铺信息</view>
+      <van-cell-group>
+        <view class="upload-wrap">
+          <view class="upload-label">店铺Logo</view>
+          <van-uploader file-list="{{editLogoList}}" max-count="1" bind:after-read="onEditLogoUpload" bind:delete="onDeleteEditLogo" />
+        </view>
+        <view class="upload-wrap">
+          <view class="upload-label">经营类型</view>
+        </view>
+        <van-field
+          label=""
+          value="{{editType}}"
+          placeholder="请输入经营类型"
+          border="{{true}}"
+          bind:change="onEditTypeInput"
+        />
+        <van-field
+          label="店铺名称"
+          value="{{editName}}"
+          placeholder="请输入店铺名称"
+          border="{{true}}"
+          bind:change="onEditNameInput"
+        />
+        <van-field
+          label="店铺简介"
+          value="{{editDesc}}"
+          type="textarea"
+          placeholder="简单介绍一下你的店铺"
+          border="{{true}}"
+          bind:change="onEditDescInput"
+        />
+        <van-field
+          label="联系电话"
+          value="{{editPhone}}"
+          type="number"
+          placeholder="请输入联系电话"
+          border="{{true}}"
+          bind:change="onEditPhoneInput"
+        />
+        <van-field
+          label="店铺地址"
+          value="{{editAddress}}"
+          placeholder="请输入店铺地址"
+          border="{{true}}"
+          bind:change="onEditAddressInput"
+        />
+      </van-cell-group>
+      <view class="edit-btns">
+        <van-button block bind:click="onCancelEdit">取消</van-button>
+        <van-button type="primary" block loading="{{saving}}" bind:click="onSaveEdit" style="margin-top: 20rpx">保存</van-button>
+      </view>
+    </view>
+
+    <!-- Quick Tips -->
+    <view class="tips" wx:if="{{shop.status === '线上审核中' || shop.status === '线下审核中'}}">
+      <text>您的店铺正在审核中，审核通过后即可管理商品。</text>
+    </view>  </block>
+
+  <!-- No Shop -->
+  <view class="empty-wrap" wx:else>
+    <van-empty description="您还没有店铺">
+      <van-button type="primary" size="small" bind:click="onRegisterTap">申请开店</van-button>
+    </van-empty>
+  </view>
+</view>

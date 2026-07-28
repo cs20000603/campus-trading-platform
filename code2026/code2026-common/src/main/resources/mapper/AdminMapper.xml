@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：定义XML版本为1.0，编码格式为UTF-8（支持中文字符）
+    doctype：声明MyBatis 3.0的DTD文档类型定义，用于校验XML标签语法
+-->
+<!--
+    mapper根元素：namespace命名空间，指定此XML映射文件对应的Java Mapper接口
+    此处映射到 com.wll.common.mapper.AdminMapper 接口，该接口中声明的方法与下方SQL语句的id一一对应
+    这样MyBatis就能通过接口方法名自动找到对应的SQL语句来执行
+-->
+<mapper namespace="com.wll.common.mapper.AdminMapper">
+
+    <!--
+        select标签：定义一条SELECT查询SQL语句
+        id="selectAll"：该SQL语句的唯一标识符，对应AdminMapper接口中的selectAll()方法名
+        resultType="com.wll.common.entity.Admin"：查询结果每一行将自动封装为Admin实体对象
+        使用分页时，MyBatis会传入一个map参数，其中包含name等可选条件
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Admin">
+        <!-- SELECT * FROM admin：查询admin(管理员)表中的所有列数据 -->
+        select * from `admin`
+        <!--
+            where标签：MyBatis动态SQL标签
+            作用1：当内部有条件成立时，自动添加WHERE关键字
+            作用2：自动去除内部第一个AND/OR，防止出现"WHERE AND"语法错误
+            如果内部所有条件都不成立，则不会生成WHERE子句
+        -->
+        <where>
+            <!--
+                if标签：MyBatis动态SQL标签，用于条件判断
+                test="name != null"：判断传入参数map中的name字段是否不为null
+                只有当name有值时，此条件才会拼接到SQL语句中，实现动态过滤
+                concat('%', #{name}, '%')：MySQL字符串拼接函数，实现模糊匹配(前后均可匹配)
+                #{name}：MyBatis参数占位符，会被替换为传入的name参数值，自动处理SQL注入防护（预编译）
+            -->
+            <if test="name != null"> and name like concat('%', #{name}, '%')</if>
+        </where>
+        <!-- ORDER BY id DESC：按id降序排列，DESC表示从大到小，最新添加的管理员排在前面 -->
+        order by id desc
+    </select>
+
+    <!--
+        按主键id查询单个管理员
+        id="selectById"：对应AdminMapper接口中的selectById方法
+        #{id}：参数占位符，会被替换为方法传入的id实参值
+    -->
+    <select id="selectById" resultType="com.wll.common.entity.Admin">
+        select * from `admin` where id = #{id}
+    </select>
+
+    <!--
+        delete标签：定义一条DELETE删除SQL语句
+        id="deleteById"：对应AdminMapper接口中的deleteById方法
+        根据主键id删除一条管理员记录
+    -->
+    <delete id="deleteById">
+        delete from `admin` where id = #{id}
+    </delete>
+
+    <!--
+        insert标签：定义一条INSERT插入SQL语句
+        parameterType="com.wll.common.entity.Admin"：指明传入的参数类型是Admin实体类
+        useGeneratedKeys="true"：启用自动获取数据库生成的主键值功能
+        插入操作完成后，数据库自动生成的id会回填到传入的Admin对象的id属性中
+        INSERT INTO admin：向admin(管理员)表插入一条新记录
+        括号中列出要插入的列名（数据库字段名）：
+          id       - 管理员唯一编号（主键）
+          username - 管理员登录用户名
+          password - 管理员登录密码（加密存储）
+          name     - 管理员显示名称/昵称
+          avatar   - 管理员头像图片URL地址
+          role     - 管理员角色（如：超级管理员、普通管理员等）
+        VALUES后跟对应的#{属性名}占位符，顺序与列名一一对应
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Admin" useGeneratedKeys="true">
+        insert into `admin`(id, username, password, name, avatar, role)
+        values (#{id}, #{username}, #{password}, #{name}, #{avatar}, #{role})
+    </insert>
+
+    <!--
+        update标签：定义一条UPDATE更新SQL语句
+        id="updateById"：对应AdminMapper接口中的updateById方法，按主键id更新管理员信息
+        UPDATE admin：更新admin(管理员)表中的记录
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Admin">
+        update `admin`
+        <!--
+            set标签：MyBatis动态SQL标签
+            作用1：自动添加SET关键字
+            作用2：自动去除尾部多余的逗号(,)，避免SQL语法错误
+            只有test条件成立的字段才会被更新，未传入的字段保持原值不变（实现部分更新）
+        -->
+        <set>
+            <!-- 只有当username属性不为null时，才更新username(用户名)字段 -->
+            <if test="username != null">username = #{username},</if>
+            <!-- 只有当password属性不为null时，才更新password(密码)字段 -->
+            <if test="password != null">password = #{password},</if>
+            <!-- 只有当name属性不为null时，才更新name(显示名称)字段 -->
+            <if test="name != null">name = #{name},</if>
+            <!-- 只有当avatar属性不为null时，才更新avatar(头像)字段 -->
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <!-- 只有当role属性不为null时，才更新role(角色)字段 -->
+            <if test="role != null">role = #{role},</if>
+        </set>
+        <!-- WHERE id = #{id}：根据主键id精确匹配要更新哪条记录 -->
+        where id = #{id}
+    </update>
+
+</mapper>

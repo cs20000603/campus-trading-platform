@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Maven POM文件 —— miniapp-backend 小程序后端模块
+此模块是可执行jar，包含Spring Boot启动类MiniappApplication
+运行在9091端口，为微信小程序提供REST API接口
+使用JWT令牌进行无状态认证，使用原生WebSocket进行实时推送
+额外集成了Spring Boot Actuator用于应用监控
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ===== 继承父POM ===== -->
+    <parent>
+        <groupId>com.wll</groupId>
+        <artifactId>code2026</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!-- 本模块坐标 -->
+    <artifactId>miniapp-backend</artifactId>
+    <name>miniapp-backend</name>
+    <description>校园外卖小程序后端</description>
+
+    <!-- ===== 依赖列表 ===== -->
+    <dependencies>
+        <!-- 依赖公共模块：获得所有共享代码 -->
+        <dependency>
+            <groupId>com.wll</groupId>
+            <artifactId>code2026-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- JJWT（Java JWT）库的三个子模块：用于小程序端的JWT令牌生成和验证 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>     <!-- JWT核心API接口 -->
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>    <!-- JWT实现逻辑 -->
+            <scope>runtime</scope>                <!-- 运行时才需要 -->
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId> <!-- JWT的Jackson JSON序列化支持 -->
+            <scope>runtime</scope>
+        </dependency>
+        <!-- Spring WebSocket支持：小程序端使用原生WebSocket（非STOMP） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <!-- Spring Boot Actuator：提供应用监控端点 -->
+        <!-- 通过 /actuator/health 检查应用健康状态 -->
+        <!-- 通过 /actuator/metrics 查看运行指标 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.IdleMessageMapper接口
+    闲置消息(IdleMessage)数据访问层，负责闲置商品交易中买卖双方聊天消息的管理
+    用于校园二手交易的一对一私聊功能
+-->
+<mapper namespace="com.wll.common.mapper.IdleMessageMapper">
+
+    <!--
+        按会话查询聊天记录：获取两个用户在某个闲置商品下的所有聊天消息
+        这是闲置交易聊天功能最核心的查询
+        LEFT JOIN user用户表，获取发消息用户的名称和头像
+        查询列说明：
+          idle_message.*  - 消息表的所有列
+          s.name          - 发送者名称（user表别名为s，取senderName别名）
+          s.avatar        - 发送者头像（取senderAvatar别名）
+        查询条件：通过idle_id限定商品，通过复杂的OR条件查询两个用户之间的双向消息
+    -->
+    <select id="selectByConversation" resultType="com.wll.common.entity.IdleMessage">
+        select idle_message.*,
+               s.name as senderName, s.avatar as senderAvatar
+            from idle_message
+            <!--
+                LEFT JOIN user s ON idle_message.sender_id = s.id
+                左连接用户表(别名为s)，获取消息发送者的信息
+            -->
+            left join user s on idle_message.sender_id = s.id
+            <!--
+                WHERE idle_message.idle_id = #{idleId}
+                限定查询某个特定闲置商品下的消息
+                这是会话的第一维度：按商品隔离
+            -->
+            where idle_message.idle_id = #{idleId}
+              <!--
+                  AND ((sender_id = userId1 AND receiver_id = userId2)
+                    OR (sender_id = userId2 AND receiver_id = userId1))
+                  复杂的OR条件：查询两个用户之间的双向对话
+                  即"用户1发给用户2的消息" OR "用户2发给用户1的消息"
+                  这样就能获取两个人之间的完整聊天记录
+              -->
+              and ((idle_message.sender_id = #{userId1} and idle_message.receiver_id = #{userId2})
+                or (idle_message.sender_id = #{userId2} and idle_message.receiver_id = #{userId1}))
+            <!-- 按创建时间升序排列(ASC)，保持对话的时间顺序（先发的先显示） -->
+            order by idle_message.create_time asc
+    </select>
+
+    <!-- 按主键id删除消息 -->
+    <delete id="deleteById">
+        delete from idle_message where id = #{id}
+    </delete>
+
+    <!--
+        插入一条闲置交易聊天消息
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明：
+          id          - 消息唯一编号（主键，自动生成）
+          idle_id     - 关联的闲置商品ID（外键，关联idle_goods表，标明是哪个商品下的对话）
+          sender_id   - 发送者用户ID（外键，关联user表，谁发的消息）
+          receiver_id - 接收者用户ID（外键，关联user表，消息发给谁）
+          content     - 消息内容（聊天的文本内容）
+          is_read     - 是否已读（0=未读，1=已读，用于消息未读提示）
+          create_time - 消息发送时间
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.IdleMessage" useGeneratedKeys="true">
+        insert into idle_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="idleId != null">idle_id,</if>
+            <if test="senderId != null">sender_id,</if>
+            <if test="receiverId != null">receiver_id,</if>
+            <if test="content != null">content,</if>
+            <if test="isRead != null">is_read,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="idleId != null">#{idleId},</if>
+            <if test="senderId != null">#{senderId},</if>
+            <if test="receiverId != null">#{receiverId},</if>
+            <if test="content != null">#{content},</if>
+            <!-- #{isRead}：消息已读状态 -->
+            <if test="isRead != null">#{isRead},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <!--
+        注意：此mapper没有提供updateById方法
+        聊天消息通常不需要修改，只需插入和查询
+        如需标记已读等功能，应该添加专门的update方法
+    -->
+
+</mapper>

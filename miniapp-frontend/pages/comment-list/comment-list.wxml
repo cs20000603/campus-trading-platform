@@ -1,0 +1,111 @@
+<view class="comment-list-page">
+  <!-- Search bar -->
+  <view class="search-wrap">
+    <van-search
+      value="{{searchText}}"
+      placeholder="搜索评价内容或商品名称"
+      bind:change="onSearch"
+      bind:search="onSearchConfirm"
+      bind:clear="onSearchClear"
+      show-action
+    />
+  </view>
+
+  <van-list
+    finished="{{finished}}"
+    finished-text="没有更多了"
+    loading="{{loading}}"
+    bind:load="onLoadMore"
+  >
+    <view wx:if="{{list.length > 0}}">
+      <view class="comment-card" wx:for="{{list}}" wx:key="id">
+        <view class="comment-top">
+          <van-image
+            src="{{item.goodsImg}}"
+            width="100rpx"
+            height="100rpx"
+            fit="cover"
+            radius="8rpx"
+            data-goods-id="{{item.goodsId}}"
+            bindtap="onTapGoods"
+          />
+          <view class="comment-goods-info" data-goods-id="{{item.goodsId}}" bindtap="onTapGoods">
+            <view class="comment-goods-name">{{item.goodsName}}</view>
+            <view class="comment-order-no">订单号: {{item.orderNo}}</view>
+          </view>
+        </view>
+
+        <view class="comment-body">
+          <view class="comment-rate-row">
+            <van-rate value="{{item.score}}" readonly size="28rpx" />
+            <text class="comment-time">{{item.time}}</text>
+          </view>
+          <view class="comment-content">{{item.content}}</view>
+        </view>
+
+        <view class="comment-actions">
+          <van-button
+            size="small"
+            type="primary"
+            plain
+            data-item="{{item}}"
+            bind:click="onEdit"
+          >
+            编辑
+          </van-button>
+          <van-button
+            size="small"
+            type="danger"
+            plain
+            data-id="{{item.id}}"
+            bind:click="onDelete"
+          >
+            删除
+          </van-button>
+        </view>
+      </view>
+    </view>
+
+    <van-empty
+      wx:if="{{!loading && list.length === 0}}"
+      description="暂无评价"
+      image="comment-o"
+    />
+  </van-list>
+
+  <!-- Edit popup -->
+  <van-popup
+    show="{{showEditPopup}}"
+    position="bottom"
+    custom-style="height: 50%;"
+    bind:close="onEditPopupClose"
+    round
+  >
+    <view class="edit-popup-content">
+      <view class="edit-popup-title">编辑评价</view>
+      <view class="edit-rate-wrapper">
+        <text class="edit-label">评分</text>
+        <van-rate value="{{editScore}}" bind:change="onEditScoreChange" size="36rpx" />
+      </view>
+      <van-field
+        value="{{editContent}}"
+        type="textarea"
+        placeholder="请输入评价内容"
+        autosize
+        border="{{true}}"
+        bind:change="onEditContentInput"
+      />
+      <view class="edit-popup-btn">
+        <van-button
+          type="primary"
+          block
+          round
+          loading="{{editSubmitting}}"
+          bind:click="onEditSubmit"
+        >
+          提交修改
+        </van-button>
+      </view>
+    </view>
+  </van-popup>
+</view>

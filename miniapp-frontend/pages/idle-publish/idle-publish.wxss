@@ -1,0 +1,8 @@
+.container { padding-bottom: 40px; }
+.upload-wrap { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; }
+.upload-item { width: 80px; height: 80px; border-radius: 4px; position: relative; overflow: hidden; }
+.upload-img { width: 100%; height: 100%; }
+.upload-delete { position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; background: rgba(0,0,0,0.5); color: white; border-radius: 50%; text-align: center; line-height: 20px; font-size: 14px; }
+.upload-add { border: 1px dashed #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.upload-text { font-size: 10px; color: #999; margin-top: 2px; }
+.submit-wrap { padding: 16px; }

@@ -1,0 +1,57 @@
+<view class="user-profile-page">
+  <view class="avatar-section">
+    <view class="avatar-wrapper" bindtap="onChooseAvatar">
+      <van-image
+        src="{{avatar || '/images/default-avatar.png'}}"
+        width="160rpx"
+        height="160rpx"
+        round
+        fit="cover"
+        class="avatar-img"
+      />
+      <view class="avatar-tip">点击更换头像</view>
+    </view>
+  </view>
+
+  <van-cell-group>
+    <van-field
+      label="昵称"
+      value="{{name}}"
+      placeholder="请输入昵称"
+      border="{{true}}"
+      clearable
+      bind:change="onNameInput"
+    />
+    <van-field
+      label="账户余额"
+      value="{{account}}"
+      readonly
+      border="{{true}}"
+    >
+      <template slot="input">
+        <text class="balance-text">¥{{account}}</text>
+      </template>
+    </van-field>
+    <van-field
+      label="手机号"
+      value="{{phone}}"
+      type="number"
+      placeholder="请输入手机号"
+      border="{{true}}"
+      clearable
+      bind:change="onPhoneInput"
+    />
+  </van-cell-group>
+
+  <view class="submit-wrapper">
+    <van-button
+      type="primary"
+      block
+      round
+      loading="{{submitting}}"
+      bind:click="onSubmit"
+    >
+      保存修改
+    </van-button>
+  </view>
+</view>

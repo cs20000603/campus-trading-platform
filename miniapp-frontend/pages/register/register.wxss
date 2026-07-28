@@ -1,0 +1,39 @@
+.register-page {
+  min-height: 100vh;
+  background: #f7f8fa;
+  padding-top: 40rpx;
+}
+
+.page-header {
+  text-align: center;
+  padding: 40rpx 60rpx;
+  margin-bottom: 20rpx;
+}
+
+.header-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.header-desc {
+  font-size: 26rpx;
+  color: #999;
+  line-height: 1.6;
+}
+
+.tips {
+  padding: 30rpx 40rpx;
+}
+
+.tip-text {
+  font-size: 24rpx;
+  color: #ff976a;
+  line-height: 1.5;
+}
+
+.submit-wrap {
+  padding: 40rpx 32rpx;
+}

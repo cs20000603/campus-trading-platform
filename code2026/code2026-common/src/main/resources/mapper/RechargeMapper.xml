@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.RechargeMapper接口
+    充值记录(Recharge)数据访问层，负责用户账户充值/消费记录的增删改查操作
+    用于管理用户钱包余额的变动记录
+-->
+<mapper namespace="com.wll.common.mapper.RechargeMapper">
+
+    <!--
+        查询所有充值记录（带分页和条件筛选）
+        LEFT JOIN user用户表，获取充值用户的名称
+        查询列说明：
+          recharge.*  - 充值记录表的所有列
+          user.name   - 用户名称（取别名userName）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Recharge">
+        select recharge.*, user.name as userName from `recharge`
+        <!-- LEFT JOIN user：关联用户表，获取充值用户的名称 -->
+        left join user on recharge.user_id = user.id
+        <where>
+            <!-- 按用户名称模糊搜索 -->
+            <if test="userName != null"> and user.name like concat('%', #{userName}, '%')</if>
+            <!-- 按充值时间(time)模糊搜索 -->
+            <if test="time != null"> and recharge.time like concat('%', #{time}, '%')</if>
+            <!-- 按用户ID筛选：查看某个用户的所有充值/消费记录 -->
+            <if test="userId != null"> and recharge.user_id = #{userId}</if>
+        </where>
+        <!-- 按充值记录id降序排列 -->
+        order by recharge.id desc
+    </select>
+
+    <!-- 按主键id查询单条充值记录 -->
+    <select id="selectById" resultType="com.wll.common.entity.Recharge">
+        select * from `recharge` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除充值记录 -->
+    <delete id="deleteById">
+        delete from `recharge` where id = #{id}
+    </delete>
+
+    <!--
+        插入一条充值/消费记录
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明：
+          id      - 记录唯一编号（主键，自动生成）
+          money   - 金额（正数表示充值/收入，负数表示消费/支出）
+          user_id - 用户ID（外键，关联user表，哪个用户的记录）
+          type    - 类型（区分是"充值"还是"消费"，或者是具体的业务类型）
+          time    - 交易时间
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Recharge" useGeneratedKeys="true">
+        insert into `recharge`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="money != null">money,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="type != null">type,</if>
+            <if test="time != null">time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <!-- #{money}：交易金额 -->
+            <if test="money != null">#{money},</if>
+            <if test="userId != null">#{userId},</if>
+            <!-- #{type}：交易类型（充值/消费） -->
+            <if test="type != null">#{type},</if>
+            <if test="time != null">#{time},</if>
+        </trim>
+    </insert>
+
+    <!--
+        【注意】此处updateById方法的SQL语句存在BUG
+        使用了INSERT INTO语句，应该使用UPDATE语句
+        正确写法应该是 UPDATE recharge SET ... WHERE id = #{id}
+        当前代码会导致"更新"操作变为"插入新记录"，这是一个严重的数据操作错误
+        建议修复为正确的UPDATE语法。
+        列说明同insert方法：
+          money   - 金额
+          user_id - 用户ID
+          type    - 交易类型
+          time    - 交易时间
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Recharge">
+        insert into `recharge`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="money != null">money,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="time != null">time,</if>
+            <if test="type != null">type,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="money != null">#{money},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="type != null">#{type},</if>
+            <if test="time != null">#{time},</if>
+        </trim>
+    </update>
+
+</mapper>

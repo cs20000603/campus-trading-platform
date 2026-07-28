@@ -1,0 +1,129 @@
+<view class="index-page">
+  <!-- Search Bar -->
+  <view class="search-bar" bind:tap="onSearchTap">
+    <van-icon name="search" size="16px" color="#999" />
+    <text class="search-placeholder">搜索商品</text>
+  </view>
+
+  <!-- Swiper Carousel -->
+  <view class="carousel-wrap" wx:if="{{carousels.length > 0}}">
+    <swiper
+      class="carousel-swiper"
+      indicator-dots="{{true}}"
+      indicator-color="rgba(255,255,255,0.6)"
+      indicator-active-color="#ee0a24"
+      autoplay="{{true}}"
+      interval="3000"
+      duration="500"
+      circular="{{true}}"
+    >
+      <swiper-item
+        wx:for="{{carousels}}"
+        wx:key="id"
+        data-goodsid="{{item.goodsId}}"
+        bind:tap="onCarouselTap"
+      >
+        <van-image
+          class="carousel-image"
+          src="{{item.img}}"
+          fit="cover"
+          width="100%"
+          height="100%"
+        />
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- AI Assistant Entry -->
+  <view class="ai-entry" bind:tap="onAiTap">
+    <view class="ai-entry-left">
+      <text class="ai-entry-icon">🤖</text>
+      <text class="ai-entry-text">AI 智能助手 · 购物问答、商品描述、智能搜索</text>
+    </view>
+    <van-icon name="arrow" size="14px" color="#999" />
+  </view>
+
+  <!-- Category Grid -->
+  <view class="category-section" wx:if="{{categories.length > 0}}">
+    <van-grid column-num="4" border="{{false}}">
+      <van-grid-item
+        wx:for="{{categories}}"
+        wx:key="id"
+        icon="shop-o"
+        text="{{item.name}}"
+        data-id="{{item.id}}"
+        data-name="{{item.name}}"
+        bind:tap="onCategoryTap"
+      />
+    </van-grid>
+  </view>
+
+  <!-- Hot Sale Section -->
+  <view class="section" wx:if="{{hotGoods.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">热销推荐</text>
+      <text class="section-more" bind:tap="onMoreHotTap">更多 ></text>
+    </view>
+    <scroll-view class="hot-scroll" scroll-x="{{true}}" enable-flex="{{true}}">
+      <view class="hot-item"
+        wx:for="{{hotGoods}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bind:tap="onGoodsTap"
+      >
+        <van-image
+          class="hot-image"
+          src="{{item.img}}"
+          fit="cover"
+          width="140px"
+          height="140px"
+          radius="8px"
+        />
+        <view class="hot-name">{{item.name}}</view>
+        <view class="hot-price">
+          <text wx:if="{{item.discountPrice}}" style="text-decoration: line-through; font-size: 20rpx; color: #999; margin-right: 4rpx">¥{{item.price}}</text>
+          <text class="price">¥{{item.discountPrice || item.price}}</text>
+          <text wx:if="{{item.discountPrice}}" style="color: red; font-size: 18rpx">折</text>
+          <text class="sale-count">已售{{item.saleCount || 0}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- New Arrival Section -->
+  <view class="section" wx:if="{{newGoods.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">新品上市</text>
+      <text class="section-more" bind:tap="onMoreNewTap">更多 ></text>
+    </view>
+    <view class="goods-grid">
+      <view class="goods-item"
+        wx:for="{{newGoods}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bind:tap="onGoodsTap"
+      >
+        <van-image
+          class="goods-image"
+          src="{{item.img}}"
+          fit="cover"
+          width="100%"
+          height="180px"
+          radius="8px 8px 0 0"
+        />
+        <view class="goods-info">
+          <view class="goods-name">{{item.name}}</view>
+          <view class="goods-bottom">
+            <text class="price">¥{{item.price}}</text>
+            <text class="sale-text">已售{{item.saleCount || 0}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Empty State -->
+  <view wx:if="{{hotGoods.length === 0 && newGoods.length === 0}}">
+    <van-empty description="暂无商品" />
+  </view>
+</view>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD，用于校验MyBatis XML映射文件的语法
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.CommentMapper接口
+    商品评价(Comment)数据访问层，负责用户对已购商品的评价/评论的增删改查操作
+-->
+<mapper namespace="com.wll.common.mapper.CommentMapper">
+
+    <!--
+        查询所有评价记录（带分页和条件筛选）
+        使用三次LEFT JOIN关联多张表，获取评价的完整信息
+        查询列说明：
+          comment.*       - 评价表的所有列
+          user.name       - 评价用户的名称（取别名userName）
+          user.avatar     - 评价用户的头像（取别名userAvatar）
+          orders.order_no - 关联订单的订单号（取别名orderNo）
+          goods.name      - 被评价商品的名称（取别名goodsName）
+          goods.img       - 被评价商品的图片（取别名goodsImg）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Comment">
+        select `comment`.*, user.name as userName, user.avatar as userAvatar, orders.order_no as orderNo, goods.name as goodsName, goods.img as goodsImg
+            from `comment`
+            <!-- LEFT JOIN user：关联评价用户信息 -->
+            left join user on `comment`.user_id = user.id
+            <!-- LEFT JOIN orders：关联订单信息，知道评价来自哪个订单 -->
+            left join orders on `comment`.order_id = orders.id
+            <!-- LEFT JOIN goods：关联商品信息，知道评价的是哪个商品 -->
+            left join goods on `comment`.goods_id = goods.id
+        <where>
+            <!-- 按评价内容模糊搜索 -->
+            <if test="content != null"> and `comment`.content like concat('%', #{content}, '%')</if>
+            <!-- 按用户ID筛选：查看某用户的所有评价 -->
+            <if test="userId != null"> and `comment`.user_id = #{userId}</if>
+            <!-- 按商品ID筛选：查看某商品收到的所有评价 -->
+            <if test="goodsId != null"> and `comment`.goods_id = #{goodsId}</if>
+            <!-- 按订单ID筛选：查看某个订单的评价 -->
+            <if test="orderId != null"> and `comment`.order_id = #{orderId}</if>
+            <!-- 按商品名称模糊搜索 -->
+            <if test="goodsName != null"> and goods.name like concat('%', #{goodsName}, '%')</if>
+        </where>
+        <!-- 按评价id降序排列 -->
+        order by `comment`.id desc
+    </select>
+
+    <!-- 按主键id查询单条评价 -->
+    <select id="selectById" resultType="com.wll.common.entity.Comment">
+        select * from `comment` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除评价 -->
+    <delete id="deleteById">
+        delete from `comment` where id = #{id}
+    </delete>
+
+    <!--
+        插入一条评价记录
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明：
+          id       - 评价唯一编号（主键，自动生成）
+          score    - 评分（如1-5星评价）
+          content  - 评价内容（用户写的评论文本）
+          user_id  - 评价用户ID（外键，关联user表）
+          time     - 评价时间
+          order_id - 关联的订单ID（外键，关联orders表，评价来自哪个订单）
+          goods_id - 被评价的商品ID（外键，关联goods表，评价的是哪个商品）
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Comment" useGeneratedKeys="true">
+        insert into `comment`
+        <!-- 动态拼接插入的列名 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="score != null">score,</if>
+            <if test="content != null">content,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="time != null">time,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="goodsId != null">goods_id,</if>
+        </trim>
+        values
+        <!-- 动态拼接插入的值，与列名顺序一一对应 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="score != null">#{score},</if>
+            <if test="content != null">#{content},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="time != null">#{time},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="goodsId != null">#{goodsId},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新评价记录
+        使用set标签只更新传入的非null字段
+        可更新的字段：评分、评价内容、关联用户、评价时间、关联订单、关联商品
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Comment">
+        update `comment`
+        <set>
+            <if test="id != null">
+                id = #{id},
+            </if>
+            <!-- 更新评分(score)，如从4星改为5星 -->
+            <if test="score != null">
+                score = #{score},
+            </if>
+            <!-- 更新评价内容(content)，修改评论文本 -->
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="time != null">
+                time = #{time},
+            </if>
+            <if test="orderId != null">
+                order_id = #{orderId},
+            </if>
+            <if test="goodsId != null">
+                goods_id = #{goodsId},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

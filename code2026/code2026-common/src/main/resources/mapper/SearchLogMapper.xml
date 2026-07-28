@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.SearchLogMapper接口
+    搜索日志(SearchLog)数据访问层，负责用户搜索行为记录的增删改查操作
+    用于记录和分析用户的搜索关键词，为推荐系统和搜索优化提供数据支持
+-->
+<mapper namespace="com.wll.common.mapper.SearchLogMapper">
+
+    <!--
+        查询所有搜索日志（带分页和条件筛选）
+        LEFT JOIN user用户表，获取搜索用户的名称
+        查询列说明：
+          search_log.* - 搜索日志表的所有列
+          user.name    - 搜索用户的名称（取别名userName）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.SearchLog">
+        select search_log.*, user.name as userName
+            from search_log
+            <!-- LEFT JOIN user：关联搜索用户的信息 -->
+            left join user on search_log.user_id = user.id
+        <where>
+            <!-- 按用户ID筛选：查看某个用户的搜索历史 -->
+            <if test="userId != null"> and search_log.user_id = #{userId}</if>
+            <!-- 按关键词(keyword)模糊搜索：查看包含某关键词的搜索记录 -->
+            <if test="keyword != null"> and search_log.keyword like concat('%', #{keyword}, '%')</if>
+        </where>
+        <!-- 按搜索日志id降序排列，最近的搜索在前 -->
+        order by search_log.id desc
+    </select>
+
+    <!-- 按主键id查询单条搜索日志 -->
+    <select id="selectById" resultType="com.wll.common.entity.SearchLog">
+        select * from search_log where id = #{id}
+    </select>
+
+    <!-- 按主键id删除搜索日志 -->
+    <delete id="deleteById">
+        delete from search_log where id = #{id}
+    </delete>
+
+    <!--
+        插入一条搜索日志（用户每次搜索时记录）
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明：
+          id      - 日志唯一编号（主键，自动生成）
+          user_id - 搜索用户ID（外键，关联user表，谁搜索的）
+          keyword - 搜索关键词（用户输入的具体搜索词）
+          time    - 搜索时间
+        这些数据可用于分析热门搜索词、用户偏好等，为推荐系统提供依据
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.SearchLog" useGeneratedKeys="true">
+        insert into search_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="keyword != null">keyword,</if>
+            <if test="time != null">time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="userId != null">#{userId},</if>
+            <!-- #{keyword}：用户输入的搜索关键词 -->
+            <if test="keyword != null">#{keyword},</if>
+            <if test="time != null">#{time},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新搜索日志
+        可更新的字段：用户ID、关键词、搜索时间
+        通常搜索日志不需要修改，但提供了此方法以应对特殊情况
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.SearchLog">
+        update search_log
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="keyword != null">keyword = #{keyword},</if>
+            <if test="time != null">time = #{time},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

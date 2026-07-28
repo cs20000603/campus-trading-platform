@@ -1,0 +1,66 @@
+<view class="goods-list-page">
+  <!-- Search Bar -->
+  <view class="search-wrap">
+    <van-search
+      value="{{searchName}}"
+      placeholder="搜索商品"
+      show-action="{{false}}"
+      bind:search="onSearchConfirm"
+      bind:clear="onSearchClear"
+    />
+  </view>
+
+  <!-- Category Tabs -->
+  <scroll-view class="category-tabs" scroll-x="{{true}}" enable-flex="{{true}}">
+    <view
+      class="category-tab {{activeCategoryId === item.id ? 'active' : ''}}"
+      wx:for="{{categories}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      data-name="{{item.name}}"
+      bind:tap="onCategoryTap"
+    >
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <!-- Goods Grid -->
+  <view class="goods-grid" wx:if="{{goodsList.length > 0}}">
+    <view class="goods-item"
+      wx:for="{{goodsList}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bind:tap="onGoodsTap"
+    >
+      <van-image
+        class="goods-image"
+        src="{{item.img}}"
+        fit="cover"
+        width="100%"
+        height="180px"
+        radius="8px 8px 0 0"
+      />
+      <view class="goods-info">
+        <view class="goods-name">{{item.name}}</view>
+        <view class="goods-bottom">
+          <text wx:if="{{item.discountPrice}}" class="price-origin" style="text-decoration: line-through; font-size: 22rpx; color: #999">¥{{item.price}}</text>
+          <text class="price" style="color: {{item.discountPrice ? 'red' : ''}}">¥{{item.discountPrice || item.price}}</text>
+          <text wx:if="{{item.discountPrice}}" style="color: red; font-size: 20rpx; margin-left: 4rpx">折扣</text>
+          <text class="sale-text">已售{{item.saleCount || 0}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Load More -->
+  <view class="load-more" wx:if="{{goodsList.length > 0}}">
+    <text wx:if="{{loading}}">加载中...</text>
+    <text wx:elif="{{!hasMore}}">没有更多了</text>
+  </view>
+
+  <!-- Empty -->
+  <van-empty
+    wx:if="{{goodsList.length === 0 && !loading}}"
+    description="暂无商品"
+  />
+</view>

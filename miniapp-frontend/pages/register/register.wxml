@@ -1,0 +1,53 @@
+<view class="register-page">
+  <view class="page-header">
+    <text class="header-title">注册账号</text>
+    <text class="header-desc">使用手机号注册，注册后即可登录使用</text>
+  </view>
+
+  <van-cell-group>
+    <van-field
+      label="手机号"
+      value="{{phone}}"
+      type="number"
+      maxlength="11"
+      placeholder="请输入11位手机号"
+      border="{{true}}"
+      required
+      bind:change="onPhoneInput"
+    />
+    <van-field
+      label="设置密码"
+      value="{{password}}"
+      type="password"
+      placeholder="请设置登录密码（至少6位）"
+      border="{{true}}"
+      required
+      bind:change="onPwdInput"
+    />
+    <van-field
+      label="确认密码"
+      value="{{confirmPassword}}"
+      type="password"
+      placeholder="请再次输入密码"
+      border="{{true}}"
+      required
+      bind:change="onConfirmPwdInput"
+    />
+  </van-cell-group>
+
+  <view class="tips">
+    <text class="tip-text">注册后即可使用手机号+密码登录</text>
+  </view>
+
+  <view class="submit-wrap">
+    <van-button
+      type="danger"
+      block
+      round
+      loading="{{submitting}}"
+      bind:click="onSubmit"
+    >
+      注册
+    </van-button>
+  </view>
+</view>

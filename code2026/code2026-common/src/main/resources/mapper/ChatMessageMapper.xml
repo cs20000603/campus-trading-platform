@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.ChatMessageMapper接口
+    聊天消息(ChatMessage)数据访问层，负责AI客服聊天消息的增删改查操作
+-->
+<mapper namespace="com.wll.common.mapper.ChatMessageMapper">
+
+    <!--
+        查询所有聊天消息（带分页和条件筛选）
+        LEFT JOIN user用户表，获取发送消息的用户名称和头像
+        查询列说明：
+          chat_message.*    - 聊天消息表的所有列
+          user.name         - 用户名称（取别名userName，用于前端显示谁发的消息）
+          user.avatar       - 用户头像（取别名userAvatar）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.ChatMessage">
+        select chat_message.*, user.name as userName, user.avatar as userAvatar
+            from chat_message
+            <!--
+                LEFT JOIN user ON chat_message.user_id = user.id
+                左连接用户表：关联消息发送者的信息
+            -->
+            left join user on chat_message.user_id = user.id
+        <where>
+            <!-- 按用户ID筛选，查看某个用户的所有聊天消息 -->
+            <if test="userId != null"> and chat_message.user_id = #{userId}</if>
+            <!--
+                按角色筛选：role字段区分消息来源
+                'USER'表示用户发送的消息，'AI'或'ASSISTANT'表示AI客服回复的消息
+            -->
+            <if test="role != null"> and chat_message.role = #{role}</if>
+        </where>
+        <!-- 按id升序排列(ASC)，保持聊天消息的时间顺序（先发的在前） -->
+        order by chat_message.id asc
+    </select>
+
+    <!-- 按主键id查询单条聊天消息 -->
+    <select id="selectById" resultType="com.wll.common.entity.ChatMessage">
+        select * from chat_message where id = #{id}
+    </select>
+
+    <!-- 按主键id删除聊天消息 -->
+    <delete id="deleteById">
+        delete from chat_message where id = #{id}
+    </delete>
+
+    <!--
+        插入一条聊天消息
+        列说明：
+          id      - 消息唯一编号（主键，自动生成）
+          user_id - 发送消息的用户ID（外键，关联user表）
+          role    - 消息角色（区分是用户还是AI发送的）
+          content - 消息内容（聊天的文本内容）
+          time    - 消息发送时间
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.ChatMessage" useGeneratedKeys="true">
+        insert into chat_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="role != null">role,</if>
+            <if test="content != null">content,</if>
+            <if test="time != null">time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="role != null">#{role},</if>
+            <if test="content != null">#{content},</if>
+            <if test="time != null">#{time},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新聊天消息
+        可更新的字段包括：用户ID、角色、消息内容、发送时间
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.ChatMessage">
+        update chat_message
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="time != null">time = #{time},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

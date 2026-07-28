@@ -1,0 +1,16 @@
+<view class="chat-container">
+  <scroll-view class="msg-list" scroll-y scroll-into-view="{{scrollToView}}" scroll-with-animation>
+    <view wx:if="{{messages.length === 0}}" class="chat-empty">暂无消息，发送第一条消息吧</view>
+    <view wx:for="{{messages}}" wx:key="id" id="msg-{{index}}" class="msg-item {{item.senderId === myId ? 'msg-right' : 'msg-left'}}">
+      <image class="msg-avatar" src="{{item.senderId === myId ? (userAvatar || '/images/default-avatar.png') : (item.senderAvatar || '/images/default-avatar.png')}}" mode="aspectFill" />
+      <view class="msg-bubble {{item.senderId === myId ? 'bubble-right' : 'bubble-left'}}">
+        <text>{{item.content}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="input-bar">
+    <input class="chat-input" value="{{inputText}}" placeholder="输入消息..." confirm-type="send" bindinput="onInputChange" bindconfirm="onSend" />
+    <button class="send-btn" size="mini" type="primary" bindtap="onSend">发送</button>
+  </view>
+</view>

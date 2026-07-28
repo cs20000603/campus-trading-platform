@@ -1,0 +1,8 @@
+{
+  "name": "campus-delivery-miniapp",
+  "version": "1.0.0",
+  "description": "校园外卖小程序",
+  "dependencies": {
+    "@vant/weapp": "^1.10.18"
+  }
+}

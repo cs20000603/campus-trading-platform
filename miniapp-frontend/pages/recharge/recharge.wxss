@@ -1,0 +1,83 @@
+.recharge-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.balance-card {
+  background: linear-gradient(135deg, #ff6b6b, #ee0a24);
+  padding: 50rpx 40rpx;
+  text-align: center;
+  color: #fff;
+}
+
+.balance-label {
+  font-size: 26rpx;
+  opacity: 0.9;
+  margin-bottom: 16rpx;
+}
+
+.balance-amount {
+  font-size: 72rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+
+.balance-amount::before {
+  content: '¥';
+  font-size: 36rpx;
+}
+
+.recharge-btn {
+  width: 200rpx;
+}
+
+.history-section {
+  margin-top: 16rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  padding: 24rpx 30rpx 0;
+  background-color: #fff;
+}
+
+/* Popup */
+.popup-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.pay-type-section {
+  margin-top: 20rpx;
+  padding: 0 20rpx;
+}
+
+.pay-type-title {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.pay-option {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.pay-option-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  margin-left: 16rpx;
+}
+
+.popup-btn {
+  margin-top: 40rpx;
+  padding: 0 20rpx;
+  padding-bottom: 20rpx;
+}

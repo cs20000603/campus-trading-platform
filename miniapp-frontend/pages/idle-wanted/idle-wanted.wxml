@@ -1,0 +1,48 @@
+<view class="container">
+  <view class="header-bar">
+    <text class="header-title">大家都在求购</text>
+    <van-button type="primary" size="small" bindtap="onPublishTap">发布求购</van-button>
+  </view>
+
+  <view wx:if="{{list.length === 0 && !loading}}" class="empty">
+    <van-empty description="暂无求购信息" />
+  </view>
+
+  <view class="wanted-list">
+    <view class="wanted-item" wx:for="{{list}}" wx:key="id">
+      <view class="wanted-top">
+        <view class="wanted-title">{{item.title}}</view>
+        <van-tag size="mini" type="{{item.status === '求购中' ? 'primary' : 'default'}}">{{item.status}}</van-tag>
+      </view>
+      <view class="wanted-budget">预算 ￥{{item.budget}}</view>
+      <view class="wanted-desc" wx:if="{{item.description}}">{{item.description}}</view>
+      <view class="wanted-footer">
+        <view class="wanted-user">
+          <image class="wanted-avatar" src="{{item.userAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+          <text class="wanted-name">{{item.userName || '匿名用户'}}</text>
+          <text class="wanted-area" wx:if="{{item.campusArea}}">· {{item.campusArea}}</text>
+        </view>
+        <text class="wanted-time">{{item.createTime}}</text>
+        <view class="wanted-del" wx:if="{{item.status === '求购中'}}" data-id="{{item.id}}" catchtap="onDeleteWanted">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Publish Popup -->
+  <van-popup show="{{showPublish}}" position="bottom" bind:close="onPublishClose" custom-style="padding: 16px; max-height: 80vh; overflow-y: auto;">
+    <view class="publish-title">发布求购</view>
+    <van-field label="标题" value="{{wantedTitle}}" placeholder="想买什么？" bind:change="onTitleInput" required />
+    <van-field label="描述" value="{{wantedDesc}}" type="textarea" placeholder="描述你的需求" autosize bind:change="onDescInput" />
+    <van-field label="预算" value="{{wantedBudget}}" type="digit" placeholder="你的预算" bind:change="onBudgetInput" required />
+    <van-field label="分类" value="{{wantedCategory || '请选择'}}" readonly is-link bind:click="onCategoryTap" />
+    <van-field label="校区" value="{{wantedArea}}" placeholder="你的校区" bind:change="onAreaInput" />
+    <view class="publish-btns">
+      <van-button type="default" size="small" bindtap="onPublishClose">取消</van-button>
+      <van-button type="primary" size="small" loading="{{submitting}}" bindtap="onSubmitWanted">发布</van-button>
+    </view>
+
+    <van-popup show="{{showCategory}}" position="bottom" bind:close="onCategoryClose">
+      <van-picker columns="{{categoryOptions}}" bind:change="onCategoryChange" show-toolbar bind:cancel="onCategoryClose" bind:confirm="onCategoryClose" />
+    </van-popup>
+  </van-popup>
+</view>

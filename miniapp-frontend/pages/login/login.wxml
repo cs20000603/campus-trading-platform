@@ -1,0 +1,58 @@
+<view class="login-container">
+  <view class="login-logo">
+    <text class="logo-text">校园小卖部</text>
+    <text class="logo-desc">校园外卖，便捷送达</text>
+  </view>
+
+  <!-- 手机号密码登录 -->
+  <view class="login-form">
+    <van-cell-group>
+      <van-field
+        label="账号"
+        value="{{account}}"
+        placeholder="请输入手机号或用户名"
+        border="{{true}}"
+        bind:change="onAccountInput"
+      />
+      <van-field
+        label="密码"
+        value="{{password}}"
+        type="password"
+        placeholder="请输入密码"
+        border="{{true}}"
+        bind:change="onPwdInput"
+      />
+    </van-cell-group>
+
+    <view class="btn-area">
+      <van-button
+        type="primary"
+        block
+        round
+        loading="{{loading}}"
+        bind:click="handleAccountLogin"
+      >
+        登录
+      </van-button>
+      <text class="forgot-link" bind:tap="onForgotPassword">忘记密码？</text>
+      <text class="forgot-link" bind:tap="onRegister" style="margin-top: 10rpx">注册账号</text>
+    </view>
+
+    <view class="divider">
+      <text class="divider-line"></text>
+      <text class="divider-text">或者</text>
+      <text class="divider-line"></text>
+    </view>
+
+    <van-button
+      type="info"
+      block
+      round
+      loading="{{loading}}"
+      bind:click="handleWxLogin"
+    >
+      微信一键登录
+    </van-button>
+    <text class="login-tip">支持手机号或用户名登录</text>
+  </view>
+</view>

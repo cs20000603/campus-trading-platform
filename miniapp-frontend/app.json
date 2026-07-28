@@ -1,0 +1,103 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/goods-list/goods-list",
+    "pages/cart/cart",
+    "pages/user/user",
+    "pages/login/login",
+    "pages/register/register",
+    "pages/goods-detail/goods-detail",
+    "pages/order-create/order-create",
+    "pages/orders/orders",
+    "pages/order-comment/order-comment",
+    "pages/user-profile/user-profile",
+    "pages/password/password",
+    "pages/collect/collect",
+    "pages/comment-list/comment-list",
+    "pages/recharge/recharge",
+    "pages/search/search",
+    "pages/reset-password/reset-password",
+    "pages/shop-register/shop-register",
+    "pages/shop-manage/shop-manage",
+    "pages/goods-manage/goods-manage",
+    "pages/shop-orders/shop-orders",
+    "pages/ai-chat/ai-chat",
+    "pages/idle-square/idle-square",
+    "pages/my-idle/my-idle",
+    "pages/idle-publish/idle-publish",
+    "pages/idle-detail/idle-detail",
+    "pages/idle-chat/idle-chat",
+    "pages/idle-wanted/idle-wanted"
+  ],
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#ee0a24",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/tabbar/home.png",
+        "selectedIconPath": "images/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/goods-list/goods-list",
+        "text": "商品",
+        "iconPath": "images/tabbar/goods.png",
+        "selectedIconPath": "images/tabbar/goods-active.png"
+      },
+      {
+        "pagePath": "pages/cart/cart",
+        "text": "购物车",
+        "iconPath": "images/tabbar/cart.png",
+        "selectedIconPath": "images/tabbar/cart-active.png"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的",
+        "iconPath": "images/tabbar/user.png",
+        "selectedIconPath": "images/tabbar/user-active.png"
+      }
+    ]
+  },
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "校园小卖部",
+    "navigationBarTextStyle": "black"
+  },
+  "usingComponents": {
+    "van-button": "@vant/weapp/button/index",
+    "van-cell": "@vant/weapp/cell/index",
+    "van-cell-group": "@vant/weapp/cell-group/index",
+    "van-field": "@vant/weapp/field/index",
+    "van-stepper": "@vant/weapp/stepper/index",
+    "van-rate": "@vant/weapp/rate/index",
+    "van-tag": "@vant/weapp/tag/index",
+    "van-search": "@vant/weapp/search/index",
+    "van-card": "@vant/weapp/card/index",
+    "van-swipe-cell": "@vant/weapp/swipe-cell/index",
+    "van-list": "./components/van-list/index",
+    "van-loading": "@vant/weapp/loading/index",
+    "van-tabs": "@vant/weapp/tabs/index",
+    "van-tab": "@vant/weapp/tab/index",
+    "van-checkbox": "@vant/weapp/checkbox/index",
+    "van-checkbox-group": "@vant/weapp/checkbox-group/index",
+    "van-dialog": "@vant/weapp/dialog/index",
+    "van-toast": "@vant/weapp/toast/index",
+    "van-image": "@vant/weapp/image/index",
+    "van-uploader": "@vant/weapp/uploader/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "van-empty": "@vant/weapp/empty/index",
+    "van-icon": "@vant/weapp/icon/index",
+    "van-radio": "@vant/weapp/radio/index",
+    "van-radio-group": "@vant/weapp/radio-group/index",
+    "van-submit-bar": "@vant/weapp/submit-bar/index",
+    "van-action-sheet": "@vant/weapp/action-sheet/index",
+    "van-notice-bar": "@vant/weapp/notice-bar/index",
+    "van-picker": "@vant/weapp/picker/index",
+    "van-grid": "@vant/weapp/grid/index",
+    "van-grid-item": "@vant/weapp/grid-item/index"
+  },
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Maven POM文件 —— springboot-backend Web后台模块
+此模块是可执行jar，包含Spring Boot启动类SpringbootApplication
+运行在9090端口，为Web管理后台和用户前台提供REST API接口
+使用STOMP协议实现WebSocket实时推送
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ===== 继承父POM ===== -->
+    <parent>
+        <groupId>com.wll</groupId>
+        <artifactId>code2026</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!-- 本模块坐标（artifactId是springboot，打出的jar叫springboot-0.0.1-SNAPSHOT.jar） -->
+    <artifactId>springboot</artifactId>
+    <name>springboot</name>
+    <description>管理端 + 用户端后端</description>
+
+    <!-- ===== 依赖列表 ===== -->
+    <dependencies>
+        <!-- 依赖公共模块：自动获得所有实体、Mapper、Service、配置类 -->
+        <dependency>
+            <groupId>com.wll</groupId>
+            <artifactId>code2026-common</artifactId>
+            <version>${project.version}</version> <!-- 引用父POM中定义的版本号 -->
+        </dependency>
+        <!-- Spring WebSocket支持：STOMP协议 + SockJS（浏览器WebSocket降级方案） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+    </dependencies>
+</project>

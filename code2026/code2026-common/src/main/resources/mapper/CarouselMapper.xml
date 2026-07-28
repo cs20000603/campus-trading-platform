@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD，校验XML文档结构
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.CarouselMapper接口
+    轮播图(Carousel)数据访问层，负责轮播图的增删改查操作
+-->
+<mapper namespace="com.wll.common.mapper.CarouselMapper">
+
+    <!--
+        查询所有轮播图（带分页和条件筛选）
+        使用LEFT JOIN关联goods商品表，获取轮播图对应商品的名称
+        carousel.* 表示查询carousel(轮播图)表的所有列
+        goods.name as goodsName 将商品表的name列取别名为goodsName，方便前端展示
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Carousel">
+        select carousel.*, goods.name as goodsName from `carousel`
+        <!--
+            LEFT JOIN：左外连接
+            以carousel(轮播图)表为主表，关联goods(商品)表
+            连接条件：carousel.goods_id = goods.id（轮播图关联的商品ID = 商品表主键ID）
+            即使goods表中没有匹配的记录，carousel的记录也会被保留（goods.name为NULL）
+        -->
+        left join goods on carousel.goods_id = goods.id
+        <!-- where动态条件：当商品名称不为空时，按商品名称模糊搜索 -->
+        <where>
+            <!-- goodsName不为空时，对goods.name进行模糊匹配 -->
+            <if test="goodsName != null"> and goods.name like concat('%', #{goodsName}, '%')</if>
+        </where>
+        <!-- 按轮播图id降序排列 -->
+        order by carousel.id desc
+    </select>
+
+    <!-- 按主键id查询单个轮播图 -->
+    <select id="selectById" resultType="com.wll.common.entity.Carousel">
+        select * from `carousel` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除轮播图 -->
+    <delete id="deleteById">
+        delete from `carousel` where id = #{id}
+    </delete>
+
+    <!--
+        插入一条新的轮播图记录
+        useGeneratedKeys="true"：插入后获取数据库自动生成的主键id
+        使用trim标签构建动态INSERT语句：
+          prefix="(" suffix=")" suffixOverrides="," 会在生成的列名列表前后添加括号，并移除尾部多余的逗号
+        列说明：
+          id       - 轮播图唯一编号（主键，可自动生成）
+          goods_id - 关联的商品ID（外键，指向goods表的id）
+          img      - 轮播图图片的URL地址
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Carousel" useGeneratedKeys="true">
+        insert into `carousel`
+        <!-- trim用于动态拼接列名部分：以"("开头，以")"结尾，自动去掉尾部多余的逗号 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <!-- 如果id不为null，则将id列加入插入列表 -->
+            <if test="id != null">id,</if>
+            <!-- 如果goodsId(关联商品ID)不为null，则将goods_id列加入插入列表 -->
+            <if test="goodsId != null">goods_id,</if>
+            <!-- 如果img(图片地址)不为null，则将img列加入插入列表 -->
+            <if test="img != null">img,</if>
+        </trim>
+        values
+        <!-- trim用于动态拼接值部分：与上方列名一一对应 -->
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="goodsId != null">#{goodsId},</if>
+            <if test="img != null">#{img},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新轮播图
+        使用set标签动态构建SET子句，只更新传入的非null字段
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Carousel">
+        update `carousel`
+        <!-- set标签自动添加SET关键字并去除尾部多余逗号 -->
+        <set>
+            <!-- 更新id字段（主键） -->
+            <if test="id != null">
+                id = #{id},
+            </if>
+            <!-- 更新goods_id字段（关联的商品ID） -->
+            <if test="goodsId != null">
+                goods_id = #{goodsId},
+            </if>
+            <!-- 更新img字段（轮播图图片URL） -->
+            <if test="img != null">
+                img = #{img},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

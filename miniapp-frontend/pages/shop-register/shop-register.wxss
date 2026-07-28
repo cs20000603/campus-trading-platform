@@ -1,0 +1,40 @@
+.register-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-top: 20rpx;
+}
+.warning-box {
+  margin: 20rpx 32rpx;
+  padding: 20rpx;
+  background: #fff2f0;
+  border: 1rpx solid #ffccc7;
+  border-radius: 8rpx;
+}
+.warning-text {
+  font-size: 26rpx;
+  color: #cf1322;
+  line-height: 1.8;
+}
+.form-title {
+  padding: 30rpx 32rpx 10rpx;
+  font-size: 28rpx;
+  color: #999;
+}
+.upload-wrap {
+  padding: 20rpx 32rpx;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin-top: 20rpx;
+}
+.upload-label {
+  font-size: 28rpx;
+  color: #323233;
+  margin-right: 20rpx;
+}
+.btn-area {
+  margin: 50rpx 32rpx;
+}
+.ai-btn-wrap {
+  padding: 0 32rpx 10rpx;
+}

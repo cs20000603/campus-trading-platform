@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.ShopMapper接口
+    店铺(Shop)数据访问层，负责店铺的增删改查操作
+    店铺是商家入驻平台的核心实体，每个店铺有独立的商品、订单等数据
+-->
+<mapper namespace="com.wll.common.mapper.ShopMapper">
+
+    <!--
+        查询所有店铺（带分页和条件筛选）
+        查询shop(店铺)表的所有列
+        列说明：
+          id            - 店铺唯一编号（主键）
+          name          - 店铺名称
+          description   - 店铺描述/简介
+          logo          - 店铺Logo图片URL
+          owner_id      - 店铺所有者用户ID（外键，关联user表）
+          status        - 店铺状态（如：审核中、正常营业、审核拒绝等）
+          phone         - 店铺联系电话
+          address       - 店铺地址
+          create_time   - 店铺创建时间
+          type          - 店铺类型（如：电子产品、服装、食品等）
+          license       - 营业执照图片URL
+          reject_reason - 审核拒绝原因（当status为"审核拒绝"时的拒绝理由）
+        筛选条件：名称模糊搜索、按所有者筛选、按状态筛选、按类型筛选
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Shop">
+        select * from `shop`
+        <where>
+            <!--
+                按店铺名称模糊搜索
+                test中 '!='' 表示name不为空字符串
+                防止用户输入空字符串导致生成无意义的LIKE '%%'查询
+            -->
+            <if test="name != null and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <!-- 按所有者ID筛选：查看某个用户拥有的店铺 -->
+            <if test="ownerId != null"> and owner_id = #{ownerId}</if>
+            <!-- 按店铺状态筛选（审核中、正常营业、审核拒绝等） -->
+            <if test="status != null"> and status = #{status}</if>
+            <!--
+                按店铺类型筛选
+                test中 '!='' 同样防止空字符串查询
+            -->
+            <if test="type != null and type != ''"> and type = #{type}</if>
+        </where>
+        <!-- 按id降序排列 -->
+        order by id desc
+    </select>
+
+    <!-- 按主键id查询单个店铺 -->
+    <select id="selectById" resultType="com.wll.common.entity.Shop">
+        select * from `shop` where id = #{id}
+    </select>
+
+    <!--
+        按所有者ID查询店铺
+        根据用户ID查找该用户拥有的店铺（一个用户通常只有一个店铺，但系统支持多个）
+        用于商家登录后查看自己的店铺信息
+    -->
+    <select id="selectByOwnerId" resultType="com.wll.common.entity.Shop">
+        select * from `shop` where owner_id = #{ownerId}
+    </select>
+
+    <!--
+        查询所有不同的店铺类型
+        SELECT DISTINCT type：去重查询，返回不重复的店铺类型列表
+        WHERE条件过滤：
+          type is not null and type != ''   - 排除空类型
+          status != '审核拒绝'               - 排除被拒绝的店铺
+        只返回已存在的、有效的店铺类型，用于前端类型筛选下拉框的数据源
+        resultType="java.lang.String"：返回的是String类型的列表
+    -->
+    <select id="selectDistinctTypes" resultType="java.lang.String">
+        select distinct type from `shop` where type is not null and type != '' and status != '审核拒绝'
+    </select>
+
+    <!-- 按主键id删除店铺 -->
+    <delete id="deleteById">
+        delete from `shop` where id = #{id}
+    </delete>
+
+    <!--
+        插入一个新店铺（用户注册商家时创建）
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明：
+          name          - 店铺名称（必填，店铺的显示名称）
+          description   - 店铺描述（可选，介绍店铺的主营业务）
+          logo          - 店铺Logo（可选，店铺标志图片）
+          owner_id      - 所有者ID（必填，店主用户ID）
+          status        - 店铺状态（初始一般为"审核中"）
+          phone         - 联系电话（店铺联系方式）
+          address       - 店铺地址（线下地址或办公地址）
+          create_time   - 创建时间
+          type          - 店铺类型（选择的经营品类）
+          license       - 营业执照（图片URL，用于平台审核）
+          reject_reason - 拒绝原因（初始为空，审核拒绝时填写）
+        注意：id没有出现在if判断中，意味着id由数据库自动生成，不手动指定
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Shop" useGeneratedKeys="true">
+        insert into `shop`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="description != null">description,</if>
+            <if test="logo != null">logo,</if>
+            <if test="ownerId != null">owner_id,</if>
+            <if test="status != null">status,</if>
+            <if test="phone != null">phone,</if>
+            <if test="address != null">address,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="type != null">type,</if>
+            <if test="license != null">license,</if>
+            <if test="rejectReason != null">reject_reason,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="description != null">#{description},</if>
+            <if test="logo != null">#{logo},</if>
+            <if test="ownerId != null">#{ownerId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="address != null">#{address},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="type != null">#{type},</if>
+            <!-- #{license}：营业执照图片URL -->
+            <if test="license != null">#{license},</if>
+            <!-- #{rejectReason}：审核拒绝原因 -->
+            <if test="rejectReason != null">#{rejectReason},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新店铺信息（如修改店铺资料、审核店铺等）
+        可更新的字段：名称、描述、Logo、所有者、状态、电话、地址、类型、营业执照、拒绝原因
+        常见场景：
+          1. 用户修改店铺资料（名称、描述、Logo等）
+          2. 管理员审核店铺（将status从"审核中"改为"正常营业"或"审核拒绝"，填写reject_reason）
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Shop">
+        update `shop`
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <if test="ownerId != null">owner_id = #{ownerId},</if>
+            <!-- 更新店铺状态（审核通过/拒绝等操作） -->
+            <if test="status != null">status = #{status},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="license != null">license = #{license},</if>
+            <!-- 更新拒绝原因（管理员审核拒绝时填写） -->
+            <if test="rejectReason != null">reject_reason = #{rejectReason},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

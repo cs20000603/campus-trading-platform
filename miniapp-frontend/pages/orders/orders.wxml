@@ -1,0 +1,101 @@
+<view class="orders-page">
+  <!-- Status Tabs -->
+  <van-tabs
+    active="{{activeTab}}"
+    bind:change="onTabChange"
+    sticky="{{true}}"
+  >
+    <van-tab
+      wx:for="{{tabs}}"
+      wx:key="index"
+      title="{{item}}"
+    />
+  </van-tabs>
+
+  <!-- Order List -->
+  <view wx:if="{{orders.length > 0}}">
+    <view class="order-card" wx:for="{{orders}}" wx:key="id">
+      <!-- Order Header -->
+      <view class="order-header">
+        <text class="order-no">订单号: {{item.orderNo}}</text>
+        <van-tag
+          type="{{getStatusTag(item.status).color === '#07c160' ? 'success' : (getStatusTag(item.status).color === '#999' ? 'default' : 'warning')}}"
+          size="small"
+        >
+          {{getStatusTag(item.status).text}}
+        </van-tag>
+      </view>
+
+      <!-- Order Items -->
+      <view class="order-items">
+        <view class="order-item" wx:for="{{item.orderDetailList}}" wx:key="id" wx:for-item="detail">
+          <van-image
+            class="order-item-img"
+            src="{{detail.goodsImg}}"
+            fit="cover"
+            width="60px"
+            height="60px"
+            radius="4px"
+          />
+          <view class="order-item-info">
+            <view class="order-item-name">{{detail.goodsName}}</view>
+            <view class="order-item-bottom">
+              <text class="price">¥{{detail.goodsPrice}}</text>
+              <text class="order-item-num">x{{detail.num}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Order Footer -->
+      <view class="order-footer">
+        <text class="order-time">{{item.time}}</text>
+        <text class="order-deliver">{{item.deliverType || '自提'}}</text>
+        <text class="order-total">合计: ¥{{item.total}}</text>
+      </view>
+
+      <!-- Order Actions -->
+      <view class="order-actions">
+        <van-button
+          wx:if="{{item.status === '待接单'}}"
+          size="small"
+          plain
+          hairline
+          type="default"
+          data-id="{{item.id}}"
+          bind:click="onCancelOrder"
+        >
+          取消订单
+        </van-button>
+        <van-button
+          wx:if="{{item.status === '已出货' || item.status === '已配送'}}"
+          size="small"
+          type="danger"
+          data-id="{{item.id}}"
+          bind:click="onConfirmReceive"
+        >
+          确认收货
+        </van-button>
+        <van-button
+          wx:if="{{item.status === '已完成'}}"
+          size="small"
+          type="warning"
+          data-id="{{item.id}}"
+          data-index="{{index}}"
+          bind:click="onCommentOrder"
+        >
+          去评价
+        </van-button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Load More -->
+  <view class="load-more" wx:if="{{orders.length > 0}}">
+    <text wx:if="{{loading}}">加载中...</text>
+    <text wx:elif="{{!hasMore}}">没有更多了</text>
+  </view>
+
+  <!-- Empty -->
+  <van-empty wx:if="{{orders.length === 0 && !loading}}" description="暂无订单" />
+</view>

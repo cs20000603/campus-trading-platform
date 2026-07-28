@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.OrderDetailMapper接口
+    订单详情(OrderDetail)数据访问层，负责订单中每个商品明细的增删改查操作
+    一个订单(Orders)可以包含多个订单详情(OrderDetail)，每个详情对应一个购买的商品
+-->
+<mapper namespace="com.wll.common.mapper.OrderDetailMapper">
+
+    <!--
+        查询所有订单详情（带分页和条件筛选）
+        查询order_detail(订单详情)表的所有列
+        列说明：
+          id          - 订单详情唯一编号（主键）
+          goods_id    - 商品ID（外键，关联goods表）
+          num         - 购买数量
+          order_id    - 所属订单ID（外键，关联orders表，一个订单可有多个详情）
+          goods_img   - 商品图片URL（下单时冗余存储，防止商品图片后续变更影响订单记录）
+          goods_name  - 商品名称（下单时冗余存储，防止商品改名影响历史订单）
+          goods_price - 商品单价（下单时冗余存储，记录交易时的实际价格）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.OrderDetail">
+        select * from `order_detail`
+        <where>
+            <!-- 按订单ID筛选：查看某个订单包含的所有商品明细 -->
+            <if test="orderId != null">order_id = #{orderId}</if>
+        </where>
+        <!-- 按id降序排列 -->
+        order by id desc
+    </select>
+
+    <!-- 按主键id查询单条订单详情 -->
+    <select id="selectById" resultType="com.wll.common.entity.OrderDetail">
+        select * from `order_detail` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除订单详情（通常不会单独删除订单详情，而是随订单一起操作） -->
+    <delete id="deleteById">
+        delete from `order_detail` where id = #{id}
+    </delete>
+
+    <!--
+        插入一条订单详情（下单时，每购买一个商品就插入一条记录）
+        useGeneratedKeys="true"：插入后自动获取数据库生成的主键id
+        列说明：
+          id          - 详情编号（主键，自动生成）
+          goods_id    - 商品ID（记录买了哪个商品）
+          num         - 购买数量
+          order_id    - 所属订单ID（记录属于哪个订单）
+          goods_img   - 商品图片（下单时快照，冗余存储商品图片URL）
+          goods_name  - 商品名称（下单时快照，冗余存储商品名称）
+          goods_price - 商品单价（下单时快照，冗余存储成交单价）
+        注意：img、name、price都是下单时的快照数据，这样即使后续商品信息变更，历史订单信息也不会受影响
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.OrderDetail" useGeneratedKeys="true">
+        insert into `order_detail`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="goodsId != null">goods_id,</if>
+            <if test="num != null">num,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="goodsImg != null">goods_img,</if>
+            <if test="goodsName != null">goods_name,</if>
+            <if test="goodsPrice != null">goods_price,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="goodsId != null">#{goodsId},</if>
+            <!-- #{num}：购买数量 -->
+            <if test="num != null">#{num},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <!-- #{goodsImg}：商品图片快照 -->
+            <if test="goodsImg != null">#{goodsImg},</if>
+            <!-- #{goodsName}：商品名称快照 -->
+            <if test="goodsName != null">#{goodsName},</if>
+            <!-- #{goodsPrice}：成交单价快照 -->
+            <if test="goodsPrice != null">#{goodsPrice},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新订单详情
+        通常订单详情不需要修改，但提供了此方法以应对特殊情况
+        可更新的字段包括：商品ID、数量、所属订单、商品快照信息等
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.OrderDetail">
+        update `order_detail`
+        <set>
+            <if test="id != null">
+                id = #{id},
+            </if>
+            <if test="goodsId != null">
+                goods_id = #{goodsId},
+            </if>
+            <if test="num != null">
+                num = #{num},
+            </if>
+            <if test="orderId != null">
+                order_id = #{orderId},
+            </if>
+            <if test="goodsImg != null">
+                goods_img = #{goodsImg},
+            </if>
+            <if test="goodsName != null">
+                goods_name = #{goodsName},
+            </if>
+            <if test="goodsPrice != null">
+                goods_price = #{goodsPrice},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

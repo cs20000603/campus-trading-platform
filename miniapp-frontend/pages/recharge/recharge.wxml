@@ -1,0 +1,97 @@
+<view class="recharge-page">
+  <!-- Balance display -->
+  <view class="balance-card">
+    <view class="balance-label">账户余额（元）</view>
+    <view class="balance-amount">{{balance}}</view>
+    <van-button
+      type="primary"
+      round
+      size="small"
+      bind:click="onShowRecharge"
+      class="recharge-btn"
+    >
+      充值
+    </van-button>
+  </view>
+
+  <!-- Recharge history -->
+  <view class="history-section">
+    <view class="section-title">充值记录</view>
+    <van-list
+      finished="{{finished}}"
+      finished-text="没有更多了"
+      loading="{{loading}}"
+      bind:load="onLoadMore"
+    >
+      <van-cell-group wx:if="{{list.length > 0}}">
+        <van-cell
+          wx:for="{{list}}"
+          wx:key="id"
+          title="+ ¥{{item.money}}"
+          label="{{item.time}}"
+          value="{{item.type}}"
+        />
+      </van-cell-group>
+
+      <van-empty
+        wx:if="{{!loading && list.length === 0}}"
+        description="暂无充值记录"
+        image="records"
+      />
+    </van-list>
+  </view>
+
+  <!-- Recharge popup -->
+  <van-popup
+    show="{{showRechargePopup}}"
+    position="bottom"
+    custom-style="padding: 30rpx; border-radius: 24rpx 24rpx 0 0;"
+    bind:close="onRechargePopupClose"
+    round
+  >
+    <view class="popup-title">充值</view>
+
+    <van-cell-group>
+      <van-field
+        label="金额"
+        value="{{amount}}"
+        type="digit"
+        placeholder="请输入充值金额"
+        border="{{true}}"
+        bind:change="onAmountInput"
+      >
+        <template slot="extra">
+          <text style="font-size: 28rpx; color: #333;">元</text>
+        </template>
+      </van-field>
+    </van-cell-group>
+
+    <view class="pay-type-section">
+      <view class="pay-type-title">支付方式</view>
+      <van-radio-group value="{{payType}}" bind:change="onPayTypeChange">
+        <view class="pay-option">
+          <van-icon name="wechat" size="36rpx" color="#07c160" />
+          <text class="pay-option-text">微信支付</text>
+          <van-radio name="微信支付" checked-color="#ee0a24" />
+        </view>
+        <view class="pay-option">
+          <van-icon name="alipay" size="36rpx" color="#1677ff" />
+          <text class="pay-option-text">支付宝</text>
+          <van-radio name="支付宝" checked-color="#ee0a24" />
+        </view>
+      </van-radio-group>
+    </view>
+
+    <view class="popup-btn">
+      <van-button
+        type="primary"
+        block
+        round
+        loading="{{rechargeSubmitting}}"
+        bind:click="onRechargeSubmit"
+      >
+        确认充值
+      </van-button>
+    </view>
+  </van-popup>
+</view>

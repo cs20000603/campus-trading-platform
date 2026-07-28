@@ -1,0 +1,45 @@
+<view class="container">
+  <view class="search-bar">
+    <van-search value="{{ title }}" placeholder="搜索闲置商品..." bind:change="onSearch" />
+  </view>
+  <view class="filter-bar">
+    <block wx:for="{{ conditionOptions }}" wx:key="*this">
+      <view class="filter-tag {{ condition === item ? 'active' : '' }}" data-field="condition" data-value="{{ item }}" bindtap="onFilterChange">{{ item }}</view>
+    </block>
+    <view style="margin-left: 8px"></view>
+    <block wx:for="{{ categoryOptions }}" wx:key="*this" wx:if="{{ index < 4 }}">
+      <view class="filter-tag {{ category === item ? 'active' : '' }}" data-field="category" data-value="{{ item }}" bindtap="onFilterChange">{{ item }}</view>
+    </block>
+  </view>
+
+  <view wx:if="{{ idleList.length === 0 && !loading }}" class="empty">
+    <van-empty description="暂无闲置商品" />
+  </view>
+
+  <van-list finished="{{ !hasMore }}" finished-text="没有更多了" loading="{{ loading }}" bind:load="loadData">
+    <view class="goods-grid">
+      <view class="goods-card" wx:for="{{ idleList }}" wx:key="id" data-id="{{ item.id }}" bindtap="onItemTap">
+        <image class="goods-img" src="{{ item.images.split(',')[0] }}" mode="aspectFill" />
+        <view class="goods-info">
+          <view class="goods-title">{{ item.title }}</view>
+          <view class="goods-price">￥{{ item.price }}
+            <text wx:if="{{ item.originalPrice }}" class="goods-original">￥{{ item.originalPrice }}</text>
+          </view>
+          <view class="goods-tags">
+            <van-tag type="warning" size="mini">{{ item.condition }}</van-tag>
+            <van-tag size="mini">{{ item.deliveryType }}</van-tag>
+          </view>
+          <view class="goods-seller">{{ item.sellerName }}{{ item.shopName ? ' · ' + item.shopName : '' }}</view>
+        </view>
+      </view>
+    </view>
+  </van-list>
+
+  <view class="bottom-bar">
+    <van-button type="primary" block bindtap="onPublishTap">发布闲置</van-button>
+    <view style="display: flex; margin-top: 8px">
+      <van-button size="small" bindtap="onWantedTap" style="flex:1">求购板</van-button>
+      <van-button size="small" bindtap="onMyTap" style="flex:1; margin-left: 6px">我的闲置</van-button>
+    </view>
+  </view>
+</view>

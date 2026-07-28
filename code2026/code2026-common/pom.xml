@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Maven POM文件 —— code2026-common 公共模块
+此模块是一个库模块（library jar），不包含Spring Boot启动类
+被springboot-backend和miniapp-backend共同依赖
+包含：实体类、Mapper接口、Service服务、配置类、异常处理、WebSocket基础类
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ===== 继承父POM ===== -->
+    <parent>
+        <groupId>com.wll</groupId>
+        <artifactId>code2026</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath> <!-- 父POM在上级目录 -->
+    </parent>
+
+    <!-- 本模块坐标 -->
+    <artifactId>code2026-common</artifactId>
+    <name>code2026-common</name>
+    <description>共享模块 - 实体、Mapper、异常、配置、工具类、公共服务</description>
+
+    <!-- ===== 依赖列表 ===== -->
+    <dependencies>
+        <!-- Spring Boot Web启动器：包含Spring MVC（REST接口）、内嵌Tomcat、Jackson JSON -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- MyBatis + Spring Boot: 自动配置SqlSessionFactory、事务管理器 -->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+        </dependency>
+        <!-- MySQL JDBC驱动：让Java程序能连接MySQL数据库 -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope> <!-- 运行时才需要，编译期不需要直接引用 -->
+        </dependency>
+        <!-- Hutool全能工具库 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+        <!-- PageHelper分页插件 -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+        </dependency>
+        <!-- Spring Data Redis: 提供StringRedisTemplate等Redis操作工具 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <!-- Spring WebSocket支持：提供STOMP协议支持 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <!-- MinIO对象存储Java SDK -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+        </dependency>
+        <!-- Lombok：通过注解自动生成getter/setter/构造器等样板代码 -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!-- ===== 构建配置 ===== -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip> <!-- 跳过Spring Boot打包（此模块不是可执行jar，只是库） -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    XML声明：版本1.0，编码UTF-8
+    DOCTYPE：MyBatis 3.0 Mapper DTD
+-->
+<!--
+    mapper命名空间：映射到com.wll.common.mapper.CollectMapper接口
+    商品收藏(Collect)数据访问层，负责用户收藏商品的增删改查操作
+-->
+<mapper namespace="com.wll.common.mapper.CollectMapper">
+
+    <!--
+        查询所有收藏记录（带分页和条件筛选）
+        使用两次LEFT JOIN关联商品表和用户表，获取收藏的完整信息
+        查询列说明：
+          collect.*      - 收藏表的所有列
+          goods.name     - 被收藏商品名称（取别名goodsName）
+          goods.img      - 被收藏商品图片（取别名goodsImg）
+          goods.price    - 被收藏商品价格（取别名goodsPrice）
+          user.name      - 收藏用户的名称（取别名userName）
+    -->
+    <select id="selectAll" resultType="com.wll.common.entity.Collect">
+        select collect.*, goods.name as goodsName, goods.img as goodsImg, goods.price as goodsPrice, user.name as userName from `collect`
+        <!--
+            LEFT JOIN goods ON collect.goods_id = goods.id
+            左连接商品表：获取被收藏商品的详细信息
+        -->
+        left join goods on collect.goods_id = goods.id
+        <!--
+            LEFT JOIN user ON collect.user_id = user.id
+            左连接用户表：获取收藏者的信息
+        -->
+        left join user on collect.user_id = user.id
+        <where>
+            <!-- 按商品名称模糊搜索 -->
+            <if test="goodsName != null"> and goods.name  like concat('%', #{goodsName}, '%')</if>
+            <!-- 按用户ID筛选：查看某个用户的收藏列表 -->
+            <if test="userId != null"> and collect.user_id  = #{userId}</if>
+            <!-- 按商品ID筛选：查看某个商品被哪些用户收藏了 -->
+            <if test="goodsId != null"> and collect.goods_id  = #{goodsId}</if>
+        </where>
+        <!-- 按收藏id降序排列，最近收藏的在前 -->
+        order by collect.id desc
+    </select>
+
+    <!-- 按主键id查询单条收藏记录 -->
+    <select id="selectById" resultType="com.wll.common.entity.Collect">
+        select * from `collect` where id = #{id}
+    </select>
+
+    <!-- 按主键id删除收藏记录（取消收藏） -->
+    <delete id="deleteById">
+        delete from `collect` where id = #{id}
+    </delete>
+
+    <!--
+        插入一条收藏记录（用户收藏某个商品）
+        列说明：
+          id       - 收藏记录唯一编号（主键，自动生成）
+          goods_id - 被收藏的商品ID（外键，关联goods表）
+          user_id  - 收藏者用户ID（外键，关联user表）
+          time     - 收藏时间
+    -->
+    <insert id="insert" parameterType="com.wll.common.entity.Collect" useGeneratedKeys="true">
+        insert into `collect`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="goodsId != null">goods_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="time != null">time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="goodsId != null">#{goodsId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="time != null">#{time},</if>
+        </trim>
+    </insert>
+
+    <!--
+        按主键id更新收藏记录
+        可更新的字段包括：关联商品、关联用户、收藏时间
+    -->
+    <update id="updateById" parameterType="com.wll.common.entity.Collect">
+        update `collect`
+        <set>
+            <if test="id != null">
+                id = #{id},
+            </if>
+            <if test="goodsId != null">
+                goods_id = #{goodsId},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="time != null">
+                time = #{time},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>
